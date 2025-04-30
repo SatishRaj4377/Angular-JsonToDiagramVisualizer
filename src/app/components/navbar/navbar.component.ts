@@ -10,111 +10,49 @@ import { DropDownListModule } from '@syncfusion/ej2-angular-dropdowns';
       <div class="navbar-left">
         <span class="nav-title">{{navTitle}}</span>
         <button ejs-dropdownbutton [items]="fileItems" content="File" (select)="onFileAction($event)"></button>
-        <button ejs-dropdownbutton [items]="viewItems" content="View" (select)="onViewToggle($event)"></button>
+        <button ejs-dropdownbutton [items]="viewItems" content="View" (select)="onToggleView($event)"></button>
         <button ejs-dropdownbutton [items]="themeItems" content="Theme" (select)="onThemeChange($event)"></button>
       </div>
       <div class="navbar-right">
         <ejs-dropdownlist
-          [dataSource]="[{ text:'JSON', value:'json' }, { text:'XML', value:'xml' }]"
-          [value]="'json'"
+          [width]="'70px'"
+          [dataSource]="editorTypes"
+          [value]="selectedEditorType"
           [fields]="{ text: 'text', value: 'value' }"
           (change)="onEditorTypeChange($event)">
         </ejs-dropdownlist>
       </div>
     </div>
   `,
-  styles: `
-  /* navbar.component.css */
-
-/* Overall container */
-.navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 56px;
-  padding: 0 16px;
-  background-color: #ffffff;
-  border-bottom: 1px solid #e0e0e0;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  font-family: "Segoe UI", sans-serif;
-  user-select: none;
-}
-
-/* Left side (title + menus) */
-.navbar-left {
-  display: flex;
-  align-items: center;
-}
-
-/* App title */
-.nav-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-right: 24px;
-  color: #333333;
-}
-
-/* Syncfusion dropdown buttons */
-button[ejs-dropdownbutton] {
-  margin-right: 12px;
-  min-width: 72px;       /* ensure consistent width */
-  padding: 6px 12px;
-  font-size: 0.875rem;
-}
-
-/* Right side (editor type switch) */
-.navbar-right {
-  display: flex;
-  align-items: center;
-}
-
-/* The dropdownlist itself */
-.navbar-right ::ng-deep .e-dropdownlist {
-  width: 100px;
-  font-size: 0.875rem;
-}
-
-/* Hover & focus states */
-button[ejs-dropdownbutton]:hover,
-button[ejs-dropdownbutton]:focus {
-  background-color: #f5f5f5;
-}
-
-/* Dark‐theme override */
-:host-context(.dark-theme) .navbar {
-  background-color: #2c2c2c;
-  border-bottom-color: #444444;
-}
-
-:host-context(.dark-theme) .nav-title,
-:host-context(.dark-theme) button[ejs-dropdownbutton] {
-  color: #f0f0f0;
-}
-
-:host-context(.dark-theme) button[ejs-dropdownbutton]:hover {
-  background-color: #3a3a3a;
-}
-
-  `
+  styleUrls: ['./navbar.component.css']
 })
 export class NavbarComponent {
   navTitle = "{} JSON Diagram Visualizer";
+
   public fileItems: ItemModel[] = [
-    { text: 'New' },
-    { text: 'Open' },
-    { text: 'Save' }
+    { text: 'Import', iconCss: 'e-icons e-import' },
+    { text: 'Export', iconCss: 'e-icons e-export' },
   ];
 
   public viewItems: ItemModel[] = [
-    { text: 'Zoom In' },
-    { text: 'Zoom Out' },
-    { text: 'Reset' }
+    { text: 'Show Grid', id: 'view-grid', iconCss: 'e-icons e-check' },
+    { text: 'Item Count', id: 'view-count', iconCss: 'e-icons e-check' },
+    { text: 'Show Expand/Collapse', id: 'expand-collapse', iconCss: 'e-icons e-check' }
   ];
 
   public themeItems: ItemModel[] = [
-    { text: 'Light' },
-    { text: 'Dark' }
+    { text: 'Light', id: 'light', iconCss: 'e-icons e-check' },
+    { text: 'Dark', id: 'dark', iconCss: '' }
   ];
+
+  selectedTheme = 'Light';
+
+  public editorTypes = [
+    { text: 'JSON', value: 'json' },
+    { text: 'XML', value: 'xml' }
+  ];
+
+  selectedEditorType = 'json';
 
   @Output() fileAction = new EventEmitter<string>();
   @Output() viewToggle = new EventEmitter<string>();
@@ -122,18 +60,28 @@ export class NavbarComponent {
   @Output() editorTypeChanged = new EventEmitter<string>();
 
   onFileAction(event: any) {
-    this.fileAction.emit(event.item.text); // Emit the selected item text
+    this.fileAction.emit(event.item.id);
   }
 
-  onViewToggle(event: any) {
-    this.viewToggle.emit(event.item.text); // Emit the selected item text
+  onToggleView(event: any) {
+    this.viewItems = this.viewItems.map(item => ({
+      ...item,
+      iconCss: item.id === event.item.id ? (item.iconCss === 'e-icons e-check' ? '' : 'e-icons e-check') : item.iconCss
+    }));
+    this.viewToggle.emit(event.item.id);
   }
 
   onThemeChange(event: any) {
-    this.themeChange.emit(event.item.text); // Emit the selected item text
+    const theme = event.item.text;
+    this.themeItems = this.themeItems.map(item => ({
+      ...item,
+      iconCss: item.text === theme ? 'e-icons e-check' : ''
+    }));
+    this.selectedTheme = theme;
+    this.themeChange.emit(event.item.id);
   }
 
   onEditorTypeChange(event: any) {
-    this.editorTypeChanged.emit(event.value); // Emit the changed value
+    this.editorTypeChanged.emit(event.value);
   }
 }
