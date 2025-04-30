@@ -6,26 +6,30 @@
   (editorTypeChanged)="editorType = $event">
 </app-navbar>
 
-<!-- <ejs-splitter orientation="Horizontal" [paneSettings]="[{ size:'300px' },{}]">
-  <e-panels>
-    <e-panel>
-      <app-editor
-        [editorType]="editorType"
-        (diagramData)="updateDiagram($event)"
-        (validStatus)="isValid = $event">
-      </app-editor>
-    </e-panel>
-    <e-panel>
-      <app-diagram
-        [nodes]="diagramModel.nodes"
-        [connectors]="diagramModel.connectors">
-      </app-diagram>
-    </e-panel>
-  </e-panels>
-</ejs-splitter>
-
-<app-status-bar
-  [isValid]="isValid"
-  [nodeCount]="diagramModel.nodes.length"
-  [language]="editorType">
-</app-status-bar> -->
+<div class="app-container">
+  <div #leftPanel class="panel left-panel">
+    <app-editor
+      [editorType]="editorType"
+      (diagramData)="onDiagramData($event)"
+      (validStatus)="isValid = $event">
+    </app-editor>
+  </div>
+  <div
+    class="splitter"
+    (mousedown)="onDragStart($event)">
+  </div>
+  <div class="panel right-panel">
+    <app-diagram
+      [nodes]="diagramData.nodes"
+      [connectors]="diagramData.connectors">
+    </app-diagram>
+  </div>
+</div>
+<div class="status-bar">
+  <span [class.invalid]="!isValid">
+    {{ isValid ? 'Valid' : 'Invalid' }} {{ editorType | uppercase }}
+  </span>
+  <span class="node-count">
+    Nodes: {{ diagramData.nodes.length }}
+  </span>
+</div>

@@ -1,6 +1,7 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Output } from '@angular/core';
 import { DropDownButtonModule, ItemModel } from '@syncfusion/ej2-angular-splitbuttons';
 import { DropDownListModule } from '@syncfusion/ej2-angular-dropdowns';
+import { EditorService } from '../../services/editor.service';
 
 @Component({
   selector: 'app-navbar',
@@ -54,10 +55,12 @@ export class NavbarComponent {
 
   selectedEditorType = 'json';
 
+  editorService = inject(EditorService);
+
   @Output() fileAction = new EventEmitter<string>();
   @Output() viewToggle = new EventEmitter<string>();
   @Output() themeChange = new EventEmitter<string>();
-  @Output() editorTypeChanged = new EventEmitter<string>();
+  @Output() editorTypeChanged = new EventEmitter<'json' | 'xml'>();
 
   onFileAction(event: any) {
     this.fileAction.emit(event.item.id);
@@ -82,6 +85,9 @@ export class NavbarComponent {
   }
 
   onEditorTypeChange(event: any) {
-    this.editorTypeChanged.emit(event.value);
+    if (event.value === 'json' || event.value === 'xml') {
+      this.editorService.setLanguage(event.value);
+      this.editorTypeChanged.emit(event.value);
+    }
   }
 }

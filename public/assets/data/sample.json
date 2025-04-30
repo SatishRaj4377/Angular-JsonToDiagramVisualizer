@@ -1,0 +1,27 @@
+{
+  "TestingData": {
+    "university": {
+      "name": "Global Tech University",
+      "location": {
+        "city": "San Francisco",
+        "state": "California",
+        "country": "USA"
+      }
+    },
+    "administration": {
+      "chancellor": "Dr. Marie Curie",
+      "registrar": "Dr. Albert Einstein",
+      "admissions_office": {
+        "director": "Dr. Rosalind Franklin",
+        "application_deadline": "2025-05-15"
+      }
+    },
+    "campus_facilities": {
+      "library": {
+        "name": "Tech Scholars Library",
+        "books_available": 50000,
+        "digital_resources": true
+      }
+    }
+  }
+}

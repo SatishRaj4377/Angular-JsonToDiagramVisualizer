@@ -1,0 +1,44 @@
+:host {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+  }
+  .app-container {
+    display: flex;
+    flex: 1;
+    position: relative;
+    user-select: none;
+  }
+  .panel {
+    height: 100%;
+    overflow: hidden;
+  }
+  .left-panel {
+    width: 300px; /* initial width */
+  }
+  .splitter {
+    width: 5px;
+    cursor: col-resize;
+    background-color: #e0e0e0;
+  }
+  .splitter:hover {
+    background-color: #b0b0b0;
+  }
+  .right-panel {
+    flex: 1;
+  }
+  .status-bar {
+    height: 32px;
+    line-height: 32px;
+    padding: 0 12px;
+    border-top: 1px solid #ccc;
+    font-family: sans-serif;
+    font-size: 0.9rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .status-bar .invalid {
+    color: red;
+  }
