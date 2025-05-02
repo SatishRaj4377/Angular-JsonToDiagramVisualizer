@@ -31,8 +31,8 @@ export class NavbarComponent {
   navTitle = "{ } JSON To Diagram Visualizer";
 
   public fileItems: ItemModel[] = [
-    { text: 'Import', iconCss: 'e-icons e-import' },
-    { text: 'Export', iconCss: 'e-icons e-export' },
+    { text: 'Import', id: 'import' , iconCss: 'e-icons e-import' },
+    { text: 'Export', id: 'export',  iconCss: 'e-icons e-export' },
   ];
 
   public viewItems: ItemModel[] = [

@@ -15,7 +15,7 @@ import { ToolbarComponent } from './components/toolbar/toolbar.component';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [ FormsModule, CommonModule, EditorComponent, DiagramComponent, NavbarComponent, NodePopupComponent, HamburgerComponent, ExportDialogComponent, ToolbarComponent ],
+  imports: [ FormsModule, CommonModule, EditorComponent, DiagramComponent, NavbarComponent, NodePopupComponent, HamburgerComponent, ExportDialogComponent, ToolbarComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
@@ -64,9 +64,65 @@ export class AppComponent {
     setTimeout(() => this.diagramComp.refreshLayout());
   }
 
-  onFileAction(action: string) { /* import/export logic here */ }
-  onViewToggle(opt: string) { /* toggle grid/count/collapse */ }
-  onThemeChange(theme: string) { /* swap CSS link or body class */ }
+  onFileAction(action: string) {
+    if (action === 'import') {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json,.xml';
+      input.onchange = evt => {
+        const file = (evt.target as HTMLInputElement).files![0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          const text = reader.result as string;
+          // update the Monaco editor…
+          this.editorComp.monacoEditorComponent.editor?.setValue(text);
+          // re‐parse & re‐layout the diagram
+          this.editorComp.onCodeChange();
+        };
+        reader.readAsText(file);
+      };
+      input.click();
+    } else {
+      // export current editor content
+      const text      = this.editorComp.monacoEditorComponent.editor?.getValue() || " ";
+      const ext       = this.editorComp.editorType;
+      const blob      = new Blob([text], { type: 'text/plain' });
+      const link      = document.createElement('a');
+      link.href       = URL.createObjectURL(blob);
+      link.download   = `Diagram.${ext}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  }
+
+  // handle View → Grid / Count / Expand‑Collapse
+  onViewToggle(opt: string) {
+    switch (opt) {
+      case 'view-grid':
+        this.diagramComp.toggleGridLines();
+        break;
+      case 'view-count':
+        this.diagramComp.toggleChildCount();
+        break;
+      case 'expand-collapse':
+        this.diagramComp.toggleExpandIcons();
+        break;
+    }
+    this.diagramComp.refreshLayout();
+  }
+
+  // handle Theme → Light / Dark
+  onThemeChange(theme: string) {
+    document.body.classList.toggle('dark-theme', theme === 'dark');
+    // switch Monaco theme
+    // this.editorComp.monacoEditorComponent.editor.ksetMonacoTheme(theme === 'dark' ? 'vs-dark' : 'vs');
+    // update diagram colors (you can wire through your themeService)
+    // this.diagram.setTheme(theme);
+    this.diagramComp.refreshLayout();
+  }
+
 
   onNodeClick(data: { content: string; path: string }) {
     this.popup.open(data);

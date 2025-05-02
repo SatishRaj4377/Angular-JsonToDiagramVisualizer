@@ -24,7 +24,7 @@ import { EditorService } from '../../services/editor.service';
 })
 export class EditorComponent implements OnInit, OnChanges, OnDestroy {
 
-  @ViewChild('monacoEditor') monacoEditorComponent !: NuMonacoEditorComponent;
+  @ViewChild('monacoEditor') public monacoEditorComponent !: NuMonacoEditorComponent;
 
   @Input() editorType: 'json' | 'xml' = 'json';
 
@@ -63,7 +63,7 @@ export class EditorComponent implements OnInit, OnChanges, OnDestroy {
 
     this.editorSubscription = this.editorService.language$.subscribe(newLanguage => {
       this.editorOptions = { ...this.editorOptions, language: newLanguage };
-      const editorInstance = this.monacoEditorComponent.editor;
+      const editorInstance = this.monacoEditorComponent?.editor;
       const model = editorInstance?.getModel();
       if (model) {
         monaco.editor.setModelLanguage(model, newLanguage);

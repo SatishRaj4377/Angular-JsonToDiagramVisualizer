@@ -1,60 +1,78 @@
 .main-container {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    overflow: hidden;
-  }
-  .app-container {
-    display: flex;
-    flex: 1;
-    position: relative;
-    user-select: none;
-  }
-  .panel {
-    height: 100%;
-    overflow: hidden;
-  }
-  .left-panel {
-    width: 300px; /* initial width */
-  }
-  .splitter {
-    width: 5px;
-    cursor: col-resize;
-    background-color: #e0e0e0;
-  }
-  .splitter:hover {
-    background-color: #b0b0b0;
-  }
-  .right-panel {
-    position: relative;
-    flex: 1;
-  }
-  .status-bar {
-    height: 20px;
-    line-height: 32px;
-    padding: 0 12px;
-    background-color: rgb(236, 236, 236);
-    border-top: 1px solid #ccc;
-    font-family: 'Consolas', 'Courier New', monospace;
-    font-size: 0.74rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  .status-message i {
-    vertical-align: middle;
-    margin-right: -2.5px;
-  }
-  .status-message.invalid {
-    color: red;
-  }
-  .status-bar .invalid {
-    color: red;
-  }
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
 
-  app-hamburger {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    z-index: 10;
-  }
+.app-container {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.panel {
+  overflow: hidden;
+  position: relative;
+}
+
+.left-panel {
+  width: 300px; /* Initial width */
+  min-width: 150px;
+  max-width: 60%;
+  border-right: 1px solid #ccc;
+}
+
+.splitter {
+  width: 5px;
+  background-color: #e0e0e0;
+  cursor: col-resize;
+}
+
+.right-panel {
+  flex: 1;
+  position: relative;
+  overflow: hidden !important;
+}
+
+app-hamburger {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 10;
+}
+
+app-toolbar {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  z-index: 10;
+}
+
+.status-bar {
+  height: 20px;
+  line-height: 32px;
+  padding: 0 12px;
+  background-color: rgb(236, 236, 236);
+  border-top: 1px solid #ccc;
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 0.74rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.status-message i {
+  vertical-align: middle;
+  margin-right: -2.5px;
+  font-size: .7rem;
+}
+
+.status-message.invalid {
+  color: red;
+}
+
+.status-bar .invalid {
+  color: red;
+}

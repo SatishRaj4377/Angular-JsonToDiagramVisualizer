@@ -22,7 +22,6 @@ interface JsonLine {
       [visible]="visible"
       [showCloseIcon]="true"
       [isModal]="true"
-      [animationSettings]="{ effect: 'Zoom' }"
       [closeOnEscape]="true"
       (overlayClick)="hide()"
     >

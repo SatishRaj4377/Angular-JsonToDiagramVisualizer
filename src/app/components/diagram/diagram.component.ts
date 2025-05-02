@@ -4,7 +4,8 @@ import {
   Input,
   OnInit,
   Output,
-  ViewChild
+  ViewChild,
+  ViewEncapsulation
 } from '@angular/core';
 import {
   DiagramComponent as EJ2Diagram,
@@ -16,7 +17,10 @@ import {
   Annotation,
   LineDistributionService,
   ShapeAnnotation,
-  Node
+  Node,
+  SnapSettingsModel,
+  SnapConstraints,
+  SnappingService
 } from '@syncfusion/ej2-angular-diagrams';
 import {
   DataBindingService,
@@ -36,7 +40,8 @@ import { DiagramNode } from '../../services/diagram-parser.service';
     DataBindingService,
     HierarchicalTreeService,
     PrintAndExportService,
-    LineDistributionService
+    LineDistributionService, 
+    SnappingService
   ],
   template: `
     <ejs-diagram
@@ -48,7 +53,7 @@ import { DiagramNode } from '../../services/diagram-parser.service';
       [getNodeDefaults]="getNodeDefaults.bind(this)"
       [getConnectorDefaults]="getConnectorDefaults.bind(this)"
       [nodes]="nodes"
-      [connectors]="connectors"
+      [connectors]="connectors" [snapSettings]="snapSettings"
       (click)="onDiagramClick($event)">
     </ejs-diagram>
   `,
@@ -60,21 +65,18 @@ export class DiagramComponent implements OnInit {
   @Input() nodes: NodeModel[] = [];
   @Input() connectors: ConnectorModel[] = [];
   @Output() nodeClicked = new EventEmitter<{ content: string, path: string }>();
-  @ViewChild('diagramRef', { static: false, read: EJ2Diagram })
-  public diagram!: EJ2Diagram;
+
+  @ViewChild('diagramRef', { static: false, read: EJ2Diagram }) public diagram!: EJ2Diagram;
 
   public diagramTools!: DiagramTools;
   public layout!: LayoutModel;
-
-  // from original JS
-  private orientations: Array<'LeftToRight'|'TopToBottom'|'RightToLeft'|'BottomToTop'> =
-    ['LeftToRight','TopToBottom','RightToLeft','BottomToTop'];
-  private orientationIndex = 0;
-  private isGraphCollapsed = false;
-
+  public snapSettings: SnapSettingsModel = { constraints: SnapConstraints.ShowLines };
+  orientationIndex = 0;
+  isGraphCollapsed = false;
   showExpandCollapseIcon = true;
   showChildItemsCount = true;
   currentOrientation: 'LeftToRight' | 'RightToLeft' | 'TopToBottom' | 'BottomToTop' = 'LeftToRight';
+  orientations: Array<'LeftToRight'|'TopToBottom'|'RightToLeft'|'BottomToTop'> = ['LeftToRight','TopToBottom','RightToLeft','BottomToTop'];
 
   ngOnInit(): void {
     this.diagramTools = DiagramTools.ZoomPan | DiagramTools.SingleSelect;
@@ -291,7 +293,7 @@ export class DiagramComponent implements OnInit {
 
   public onDiagramClick(args: any) {
     const e = args.element;
-    if (e?.data?.actualdata && e.data?.path) {
+    if (e?.data?.actualdata && e.data?.path && args.actualObject) {
       this.nodeClicked.emit({
         content: e.data.actualdata,
         path:    e.data.path
@@ -343,14 +345,12 @@ export class DiagramComponent implements OnInit {
   }
 
   public searchNodes(query: string) {
-    // default styling (replace with themeService later)
     const defaultStroke = '#000000';     // black
     const defaultFill   = '#FFFFFF';     // white
     const highlightStroke = '#4CAF50';   // green
     const highlightFill   = '#E8F5E9';   // light green
   
     (this.diagram.nodes as DiagramNode[]).forEach(node => {
-      // EJ2 appends “_content” to the node’s <g> id for the shape element
       const elem = document.getElementById(node.id + '_content');
       if (!elem) { return; }
   
@@ -368,7 +368,25 @@ export class DiagramComponent implements OnInit {
   }
   
   
+  public toggleGridLines(): void {
+    const snap = this.diagram?.snapSettings;
+    if (!snap || typeof snap.constraints === 'undefined') return;
+    const current = snap.constraints;
+    if ((current & SnapConstraints.ShowLines) === SnapConstraints.ShowLines) {
+      snap.constraints = current & ~SnapConstraints.ShowLines;
+    } else {
+      snap.constraints = current | SnapConstraints.ShowLines;
+    }
+  }
   
 
-
+  public toggleChildCount(): void {
+    this.showChildItemsCount = !this.showChildItemsCount;
+    this.diagram.refresh();
+  }
+  
+  public toggleExpandIcons(): void {
+    this.showExpandCollapseIcon = !this.showExpandCollapseIcon;
+    this.diagram.refresh();
+  }
 }

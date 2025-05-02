@@ -33,9 +33,6 @@ import {
   `,
   styles: [`
     .diagram-toolbar {
-      position: absolute;
-      bottom: 8px;
-      left: 8px;
       display: flex;
       align-items: center;
       z-index: 10;

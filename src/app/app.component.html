@@ -1,31 +1,48 @@
 <div class="main-container">
-
-  <app-navbar (fileAction)="onFileAction($event)" (viewToggle)="onViewToggle($event)"
-    (themeChange)="onThemeChange($event)" (editorTypeChanged)="editorType = $event">
+  <!-- Your navbar at top -->
+  <app-navbar
+    (fileAction)="onFileAction($event)"
+    (viewToggle)="onViewToggle($event)"
+    (themeChange)="onThemeChange($event)">
   </app-navbar>
 
+  <!-- Split panels grow to fill -->
   <div class="app-container">
+    <!-- Left: editor -->
     <div #leftPanel class="panel left-panel">
-      <app-editor [editorType]="editorType" (diagramData)="onDiagramData($event)" (validStatus)="isValid = $event">
+      <app-editor
+        [editorType]="editorType"
+        (diagramData)="onDiagramData($event)"
+        (validStatus)="isValid = $event">
       </app-editor>
     </div>
-    <div class="splitter" (mousedown)="onDragStart($event)">
-    </div>
+
+    <!-- Draggable splitter -->
+    <div class="splitter" (mousedown)="onDragStart($event)"></div>
+
+    <!-- Right: diagram + overlayed hamburger & toolbar -->
     <div class="panel right-panel">
       <app-hamburger
         (exportImage)="exportDialog.open()"
         (rotateLayout)="diagramComp.rotateLayout()"
         (collapseGraph)="diagramComp.toggleCollapse()">
       </app-hamburger>
-      <app-diagram [nodes]="diagramData.nodes" [connectors]="diagramData.connectors"
+
+      <app-diagram
+        #diagramComp
+        [nodes]="diagramData.nodes"
+        [connectors]="diagramData.connectors"
         (nodeClicked)="onNodeClick($event)">
       </app-diagram>
+
       <app-toolbar
         (toolClick)="handleToolbar($event)"
         (searchNode)="diagramComp.searchNodes($event)">
       </app-toolbar>
     </div>
   </div>
+
+  <!-- Status bar at the very bottom -->
   <div class="status-bar">
     <span class="status-message" [class.invalid]="!isValid">
       <i *ngIf="isValid" class="e-icons e-check-3"></i>
@@ -38,8 +55,6 @@
   </div>
 </div>
 
+<!-- Popups outside main container -->
 <app-node-popup></app-node-popup>
-<app-export-dialog
-  #exportDialog
-  (exportConfirmed)="onExport($event)">
-</app-export-dialog>
+<app-export-dialog #exportDialog (exportConfirmed)="onExport($event)"></app-export-dialog>
