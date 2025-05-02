@@ -20,6 +20,10 @@
       <app-diagram [nodes]="diagramData.nodes" [connectors]="diagramData.connectors"
         (nodeClicked)="onNodeClick($event)">
       </app-diagram>
+      <app-toolbar
+        (toolClick)="handleToolbar($event)"
+        (searchNode)="diagramComp.searchNodes($event)">
+      </app-toolbar>
     </div>
   </div>
   <div class="status-bar">

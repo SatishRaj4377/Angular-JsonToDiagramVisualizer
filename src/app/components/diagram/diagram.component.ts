@@ -341,4 +341,34 @@ export class DiagramComponent implements OnInit {
     this.diagram.dataBind();
     this.diagram.doLayout();
   }
+
+  public searchNodes(query: string) {
+    // default styling (replace with themeService later)
+    const defaultStroke = '#000000';     // black
+    const defaultFill   = '#FFFFFF';     // white
+    const highlightStroke = '#4CAF50';   // green
+    const highlightFill   = '#E8F5E9';   // light green
+  
+    (this.diagram.nodes as DiagramNode[]).forEach(node => {
+      // EJ2 appends “_content” to the node’s <g> id for the shape element
+      const elem = document.getElementById(node.id + '_content');
+      if (!elem) { return; }
+  
+      if (query) {
+        const text = (node.data.actualdata as string).toLowerCase();
+        const match = text.includes(query.toLowerCase());
+        elem.setAttribute('stroke', match ? highlightStroke : defaultStroke);
+        elem.setAttribute('fill',   match ? highlightFill   : defaultFill);
+      } else {
+        // reset to defaults when query is empty
+        elem.setAttribute('stroke', defaultStroke);
+        elem.setAttribute('fill',   defaultFill);
+      }
+    });
+  }
+  
+  
+  
+
+
 }

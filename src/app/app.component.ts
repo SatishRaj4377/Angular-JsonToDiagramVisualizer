@@ -9,12 +9,13 @@ import { NodePopupComponent } from './components/node-popup/node-popup.component
 import { HamburgerComponent } from './components/hamburger/hamburger.component';
 import { ExportDialogComponent } from './components/export-dialog/export-dialog.component';
 import { FileFormats } from '@syncfusion/ej2-angular-diagrams';
+import { ToolbarComponent } from './components/toolbar/toolbar.component';
 
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [ FormsModule, CommonModule, EditorComponent, DiagramComponent, NavbarComponent, NodePopupComponent, HamburgerComponent, ExportDialogComponent ],
+  imports: [ FormsModule, CommonModule, EditorComponent, DiagramComponent, NavbarComponent, NodePopupComponent, HamburgerComponent, ExportDialogComponent, ToolbarComponent ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
@@ -77,4 +78,19 @@ export class AppComponent {
       fileName: evt.fileName
     });
   }
+
+  handleToolbar(action: 'reset'|'fitToPage'|'zoomIn'|'zoomOut') {
+    switch(action) {
+      case 'reset':
+        this.diagramComp.diagram.reset(); break;
+      case 'fitToPage':
+        this.diagramComp.diagram.fitToPage(); break;
+      case 'zoomIn':
+        this.diagramComp.diagram.zoomTo({ type:'ZoomIn', zoomFactor:0.2 }); break;
+      case 'zoomOut':
+        this.diagramComp.diagram.zoomTo({ type:'ZoomOut', zoomFactor:0.2 }); break;
+    }
+  }
+  
+
 }
