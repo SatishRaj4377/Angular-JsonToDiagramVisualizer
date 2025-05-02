@@ -8,7 +8,7 @@ import { Component } from '@angular/core';
       status-bar works!
     </p>
   `,
-  styles: ``
+  styles: `:host{ font-family: Consolas;}`
 })
 export class StatusBarComponent {
 

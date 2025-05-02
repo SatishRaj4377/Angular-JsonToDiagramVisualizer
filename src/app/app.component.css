@@ -29,15 +29,23 @@
     flex: 1;
   }
   .status-bar {
-    height: 32px;
+    height: 20px;
     line-height: 32px;
     padding: 0 12px;
+    background-color: rgb(236, 236, 236);
     border-top: 1px solid #ccc;
-    font-family: sans-serif;
-    font-size: 0.9rem;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 0.74rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
+  }
+  .status-message i {
+    vertical-align: middle;
+    margin-right: -2.5px;
+  }
+  .status-message.invalid {
+    color: red;
   }
   .status-bar .invalid {
     color: red;

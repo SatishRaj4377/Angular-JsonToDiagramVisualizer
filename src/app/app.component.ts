@@ -1,5 +1,4 @@
 import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
-import { SplitterModule } from '@syncfusion/ej2-angular-layouts';
 import { CommonModule } from '@angular/common';
 import { EditorComponent } from './components/editor/editor.component';
 import { DiagramComponent } from './components/diagram/diagram.component';
@@ -11,13 +10,15 @@ import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [ FormsModule, CommonModule, SplitterModule, EditorComponent, DiagramComponent, NavbarComponent ],
+  imports: [ FormsModule, CommonModule, EditorComponent, DiagramComponent, NavbarComponent ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
 export class AppComponent {
   @ViewChild('leftPanel', { static: true }) leftPanel!: ElementRef<HTMLDivElement>;
   @ViewChild(DiagramComponent) diagramCmp!: DiagramComponent;
+  @ViewChild(EditorComponent, { static: true }) editorComp!: EditorComponent;
+
   editorType: 'json' | 'xml' = 'json';
   isValid = true;
   diagramData: DiagramData = { nodes: [], connectors: [] };
@@ -43,6 +44,7 @@ export class AppComponent {
     const min = 150, max = window.innerWidth * 0.5;
     this.leftPanel.nativeElement.style.width =
       Math.min(Math.max(newWidth, min), max) + 'px';
+    this.editorComp.layoutEditor();
   }
 
   @HostListener('document:mouseup')
@@ -54,6 +56,7 @@ export class AppComponent {
   
   onDiagramData(data: DiagramData) {
     this.diagramData = data;
+    setTimeout(() => this.diagramCmp.diagram.doLayout(), 10);
   }
 
   onFileAction(action: string) { /* import/export logic here */ }

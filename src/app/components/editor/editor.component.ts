@@ -16,7 +16,7 @@ import { EditorService } from '../../services/editor.service';
       *ngIf="isBrowser"
       [(ngModel)]="code"
       [options]="editorOptions"
-      (event)="onEditorEvent($event)"
+      (ngModelChange)="onCodeChange()"
       style="width:100%; height:100%; display:block;">
     </nu-monaco-editor>
   `,
@@ -96,14 +96,7 @@ export class EditorComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
-  onEditorEvent(e: NuMonacoEditorEvent) {
-    if (e.type === 'init') {
-      // after Monaco is initialized, parse the initial code
-      this.onCodeChange();
-    }
-  }
-
-  private onCodeChange() {
+  onCodeChange() {
     try {
       let result: DiagramData;
       if (this.editorType === 'json') {
@@ -117,5 +110,9 @@ export class EditorComponent implements OnInit, OnChanges, OnDestroy {
     } catch {
       this.validStatus.emit(false);
     }
+  }
+
+  layoutEditor(): void {
+    this.monacoEditorComponent?.editor?.layout();
   }
 }

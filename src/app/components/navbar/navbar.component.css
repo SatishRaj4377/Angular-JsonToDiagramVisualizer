@@ -3,13 +3,13 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: 56px;
+    height: 46px;
     padding: 0 16px;
-    background-color: #ffffff;
+    background-color: rgb(236, 236, 236);
     border-bottom: 1px solid #e0e0e0;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    font-family: "Segoe UI", sans-serif;
     user-select: none;
+    font-family: 'Consolas', 'Courier New', monospace;
   }
   
   /* Left side (title + menus) */
@@ -20,7 +20,7 @@
   
   /* App title */
   .nav-title {
-    font-size: 1.25rem;
+    font-size: 1.125rem;
     font-weight: 600;
     margin-right: 24px;
     color: #333333;

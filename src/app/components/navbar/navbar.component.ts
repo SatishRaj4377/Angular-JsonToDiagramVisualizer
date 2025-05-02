@@ -28,7 +28,7 @@ import { EditorService } from '../../services/editor.service';
   styleUrls: ['./navbar.component.css']
 })
 export class NavbarComponent {
-  navTitle = "{} JSON Diagram Visualizer";
+  navTitle = "{ } JSON To Diagram Visualizer";
 
   public fileItems: ItemModel[] = [
     { text: 'Import', iconCss: 'e-icons e-import' },
