@@ -182,13 +182,15 @@ export class DiagramComponent implements OnInit{
       } else {
         // value
         ann.style = { fontSize: 12, fontFamily: fontSpec.split(' ')[1], color: "black" };
-        const prev = anns[i - 1] as ShapeAnnotation;
-        const keyWidth = prev ? ctx.measureText(prev.content).width : 0;
+        const prevAnnotations = anns[i - 1] as ShapeAnnotation;
+        const keyWidth = prevAnnotations ? ctx.measureText(prevAnnotations.content).width : 0;
         const valWidth = ctx.measureText(ann.content).width;
         const keyOffsetX = (keyWidth / 2) / node.width!;
         const valueOffsetX = ((keyOffsetX * 2) + (valWidth / 2) / node.width!) + (padding + 8) / node.width!;
-        ann.offset = { x: valueOffsetX, y: offsetY };
-        ann.content = this.formatDisplayValue(ann.content);
+        if (prevAnnotations){
+          ann.offset = { x: valueOffsetX, y: offsetY };
+          ann.content = this.formatDisplayValue(ann.content);
+        }
         currentLine++;
       }
     }
