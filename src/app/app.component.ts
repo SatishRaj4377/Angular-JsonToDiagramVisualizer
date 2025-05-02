@@ -28,7 +28,6 @@ export class AppComponent {
   private startWidth = 0;
 
   //#region  Splitter Dragging
-
   onDragStart(evt: MouseEvent) {
     this.dragging = true;
     this.startX = evt.clientX;
@@ -51,12 +50,11 @@ export class AppComponent {
   onDragEnd() {
     this.dragging = false;
   }
-
   //#endregion
   
   onDiagramData(data: DiagramData) {
     this.diagramData = data;
-    setTimeout(() => this.diagramCmp.diagram.doLayout(), 10);
+    setTimeout(() => this.diagramCmp.refreshLayout(), 10);
   }
 
   onFileAction(action: string) { /* import/export logic here */ }

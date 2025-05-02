@@ -1,33 +1,13 @@
-import { Component, Input, ViewChild, OnChanges, SimpleChanges, AfterViewInit } from '@angular/core';
-import {
-  DiagramComponent as EJ2Diagram,
-  DiagramModule,
-  NodeModel,
-  ConnectorModel,
-  DiagramTools,
-  LayoutModel,
-  Annotation
-} from '@syncfusion/ej2-angular-diagrams';
-import {
-  DataBindingService,
-  HierarchicalTreeService,
-  PrintAndExportService,
-  NodeConstraints,
-  ConnectorConstraints,
-  ConnectionPointOrigin
-} from '@syncfusion/ej2-angular-diagrams';
+import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { DiagramComponent as EJ2Diagram, DiagramModule, NodeModel, ConnectorModel, DiagramTools, LayoutModel, Annotation } from '@syncfusion/ej2-angular-diagrams';
+import { DataBindingService, HierarchicalTreeService, PrintAndExportService, NodeConstraints, ConnectorConstraints, ConnectionPointOrigin } from '@syncfusion/ej2-angular-diagrams';
 import { DiagramNode } from '../../services/diagram-parser.service';
-// import themeService from '../helper/themeService';
 
 @Component({
   selector: 'app-diagram',
   standalone: true,
   imports: [DiagramModule],
-  providers: [
-    DataBindingService,
-    HierarchicalTreeService,
-    PrintAndExportService
-  ],
+  providers: [ DataBindingService, HierarchicalTreeService, PrintAndExportService ],
   template: `
     <ejs-diagram
       #diagramRef
@@ -39,62 +19,38 @@ import { DiagramNode } from '../../services/diagram-parser.service';
       [getConnectorDefaults]="getConnectorDefaults.bind(this)"
       [nodes]="nodes"
       [connectors]="connectors"
-      (loaded)="onLoaded()">
+      >
     </ejs-diagram>
   `,
   styles: [`
     :host { display:block; width:100%; height:100%; }
   `]
 })
-export class DiagramComponent implements OnChanges, AfterViewInit {
+export class DiagramComponent implements OnInit{
+  public layout?: LayoutModel;
+  public diagramTools?: DiagramTools;
+
   @Input() nodes: NodeModel[] = [];
   @Input() connectors: ConnectorModel[] = [];
 
-  @ViewChild('diagramRef', { static: false, read: EJ2Diagram })
-  public diagram!: EJ2Diagram;
+  @ViewChild('diagramRef', { static: false, read: EJ2Diagram }) public diagram!: EJ2Diagram;
 
-  // Toggle options
   showExpandCollapseIcon = true;
   showChildItemsCount = true;
   currentOrientation: 'LeftToRight' | 'RightToLeft' | 'TopToBottom' | 'BottomToTop' = 'LeftToRight';
-
-  diagramTools: DiagramTools = DiagramTools.ZoomPan | DiagramTools.SingleSelect;
-
-  layout: LayoutModel = {
-    type: 'HierarchicalTree',
-    orientation: 'LeftToRight',
-    horizontalSpacing: 30,
-    verticalSpacing: 100,
-    enableAnimation: false,
-    connectionPointOrigin: ConnectionPointOrigin.DifferentPoint
-  };
-
-  // private currentThemeSettings = themeService.getCurrentThemeSettings();
-
-  ngAfterViewInit() {
-    this.refreshLayout();
+  
+  ngOnInit(): void {
+    this.diagramTools = DiagramTools.ZoomPan | DiagramTools.SingleSelect;
+    this.layout =  {
+      type: 'HierarchicalTree',
+      orientation: this.currentOrientation,
+      horizontalSpacing: 30,
+      verticalSpacing: 100,
+      connectionPointOrigin: ConnectionPointOrigin.DifferentPoint
+    };
   }
 
-  ngOnChanges(changes: SimpleChanges) {
-    if (this.diagram && (changes['nodes'] || changes['connectors'])) {
-      this.refreshLayout();
-    }
-  }
-
-  onLoaded() {
-    this.refreshLayout();
-  }
-
-  /** Perform layout bind, layout, and fit */
-  private refreshLayout() {
-    this.diagram.dataBind();
-    this.diagram.doLayout();
-    this.diagram.fitToPage({ mode: 'Page', region: 'Content', canZoomIn: true });
-  }
-
-  /** Calculate node defaults including size, styling, and collapse/expand icons */
   getNodeDefaults(node: NodeModel): NodeModel {
-    // const settings = this.currentThemeSettings;
     const isLeaf = (node as DiagramNode).additionalInfo?.isLeaf === true;
     const isMainRoot = node.id === 'main-root';
     const fontSpec = '12px Consolas';
@@ -154,8 +110,8 @@ export class DiagramComponent implements OnChanges, AfterViewInit {
 
     // Expand/collapse icons
     if (!isLeaf && !isMainRoot && this.showExpandCollapseIcon) {
-      const expandIcon = this.createIcon('Minus');
-      const collapseIcon = this.createIcon('Plus');
+      const expandIcon = this.createIcon('Minus', expandIconWidth, node.height);
+      const collapseIcon = this.createIcon('Plus', expandIconWidth, node.height);
       this.updateIconOffset(expandIcon);
       this.updateIconOffset(collapseIcon);
       node.expandIcon = expandIcon;
@@ -168,7 +124,6 @@ export class DiagramComponent implements OnChanges, AfterViewInit {
     return node;
   }
 
-  /** Helper: calculate width and height */
   private calculateNodeSize(
     node: NodeModel,
     fontSpec: string,
@@ -195,7 +150,7 @@ export class DiagramComponent implements OnChanges, AfterViewInit {
         maxTextWidth = Math.max(maxTextWidth, ctx.measureText(anns[0]?.content || '').width);
       }
     } else if (anns.length === 2) {
-      const text = (anns[0] as Annotation).content + anns[1].content;
+      const text = (anns[0] as Annotation).content + "  " +  anns[1].content;
       maxTextWidth = ctx.measureText(text).width;
       linesCount = 1;
     }
@@ -205,7 +160,6 @@ export class DiagramComponent implements OnChanges, AfterViewInit {
     return { width, height };
   }
 
-  /** Position leaf annotations */
   private layoutLeafAnnotations(node: NodeModel, fontSpec: string, padding: number, lineHeight: number) {
     const ctx = document.createElement('canvas').getContext('2d')!;
     ctx.font = fontSpec;
@@ -232,34 +186,31 @@ export class DiagramComponent implements OnChanges, AfterViewInit {
     }
   }
 
-  /** Create expand/collapse icon defaults */
-  private createIcon(shape: 'Plus' | 'Minus') {
-    // const settings = this.currentThemeSettings;
+  private createIcon(shape: 'Plus' | 'Minus', iconWidth : number, iconHeight: number) {
     return {
       shape,
-      width: 36,
-      height: 36,
+      width: iconWidth,
+      height: iconHeight,
       cornerRadius: 3,
       fill: "gray",
       borderColor:"black",
-      iconColor: "black"
+      iconColor: "black",
+      margin: {right: iconWidth / 2}
     };
   }
 
-  /** Update icon offset based on orientation */
   private updateIconOffset(icon: any) {
-    if (this.currentOrientation === 'LeftToRight') {
+    if (this.currentOrientation === 'TopToBottom') {
       icon.offset = { x: 1, y: 0.5 };
     } else if (this.currentOrientation === 'RightToLeft') {
       icon.offset = { x: 0, y: 0.5 };
-    } else if (this.currentOrientation === 'TopToBottom') {
+    } else if (this.currentOrientation === 'LeftToRight') {
       icon.offset = { x: 0.5, y: 1 };
     } else {
       icon.offset = { x: 0.5, y: 0 };
     }
   }
 
-  /** Connector defaults */
   getConnectorDefaults(connector: ConnectorModel): ConnectorModel {
     connector.constraints = ConnectorConstraints.Default | ConnectorConstraints.ReadOnly;
     connector.type = 'Orthogonal';
@@ -267,5 +218,11 @@ export class DiagramComponent implements OnChanges, AfterViewInit {
     connector.cornerRadius = 15;
     connector.targetDecorator = { shape: 'None' };
     return connector;
+  }
+
+  refreshLayout() {
+    this.diagram.dataBind();
+    this.diagram.doLayout();
+    this.diagram.fitToPage({ mode: 'Page', region: 'Content', canZoomIn: true });
   }
 }
