@@ -1,5 +1,5 @@
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
-import { DiagramComponent as EJ2Diagram, DiagramModule, NodeModel, ConnectorModel, DiagramTools, LayoutModel, Annotation } from '@syncfusion/ej2-angular-diagrams';
+import { DiagramComponent as EJ2Diagram, DiagramModule, NodeModel, ConnectorModel, DiagramTools, LayoutModel, Annotation, LineDistributionService, ShapeAnnotationModel, ShapeAnnotation } from '@syncfusion/ej2-angular-diagrams';
 import { DataBindingService, HierarchicalTreeService, PrintAndExportService, NodeConstraints, ConnectorConstraints, ConnectionPointOrigin } from '@syncfusion/ej2-angular-diagrams';
 import { DiagramNode } from '../../services/diagram-parser.service';
 
@@ -7,7 +7,7 @@ import { DiagramNode } from '../../services/diagram-parser.service';
   selector: 'app-diagram',
   standalone: true,
   imports: [DiagramModule],
-  providers: [ DataBindingService, HierarchicalTreeService, PrintAndExportService ],
+  providers: [ DataBindingService, HierarchicalTreeService, PrintAndExportService, LineDistributionService ],
   template: `
     <ejs-diagram
       #diagramRef
@@ -143,7 +143,7 @@ export class DiagramComponent implements OnInit{
       const values = anns.filter(a => a.id?.startsWith('Value'));
       linesCount = keys.length;
       for (let i = 0; i < keys.length; i++) {
-        const text = keys[i].content + ' ' + (values[i]?.content || '');
+        const text = keys[i].content + '  ' + (values[i]?.content || '');
         maxTextWidth = Math.max(maxTextWidth, ctx.measureText(text).width);
       }
       if (keys.length === 0) {
@@ -161,29 +161,45 @@ export class DiagramComponent implements OnInit{
   }
 
   private layoutLeafAnnotations(node: NodeModel, fontSpec: string, padding: number, lineHeight: number) {
+    const anns = node.annotations!;
+    const total = anns.filter(a => a.id?.startsWith('Key')).length;
+    const spacingY = total > 0 ? 1 / (total + 1) : 0.5;
+    let currentLine = 1;
     const ctx = document.createElement('canvas').getContext('2d')!;
     ctx.font = fontSpec;
-    const anns = node.annotations!;
-    const keyAnns = anns.filter(a => a.id?.startsWith('Key'));
-    const total = keyAnns.length;
-    const spacing = total > 0 ? 1 / (total + 1) : 0.5;
-    let line = 1;
+
     for (let i = 0; i < anns.length; i++) {
-      const ann = anns[i];
-      const isKey = ann.id?.startsWith('Key');
-      const text = ann.content ?? " ";
-      const textWidth = ctx.measureText(text).width;
-      const offsetY = spacing * (isKey ? line : line);
-      if (isKey) {
-        ann.style = { fontSize: 12, fontFamily: 'Consolas', color: "black"};
-        ann.offset = { x: (textWidth / 2 + padding) / node.width!, y: offsetY };
+      const ann = anns[i] as ShapeAnnotation;
+      if (!ann.id) continue;
+      const offsetY = spacingY * currentLine;
+
+      if (ann.id.startsWith('Key')) {
+        // key
+        ann.style = { fontSize: 12, fontFamily: fontSpec.split(' ')[1], color: "black" };
+        const keyWidth = ctx.measureText(ann.content).width;
+        const keyOffsetX = (keyWidth / 2 + padding) / node.width!;
+        ann.offset = { x: keyOffsetX, y: offsetY };
       } else {
-        ann.style = { fontSize: 12, fontFamily: 'Consolas', color: "black" };
-        ann.offset = { x: (textWidth / 2 + padding * 2) / node.width!, y: offsetY };
-        line++;
+        // value
+        ann.style = { fontSize: 12, fontFamily: fontSpec.split(' ')[1], color: "black" };
+        const prev = anns[i - 1] as ShapeAnnotation;
+        const keyWidth = prev ? ctx.measureText(prev.content).width : 0;
+        const valWidth = ctx.measureText(ann.content).width;
+        const keyOffsetX = (keyWidth / 2) / node.width!;
+        const valueOffsetX = ((keyOffsetX * 2) + (valWidth / 2) / node.width!) + (padding + 8) / node.width!;
+        ann.offset = { x: valueOffsetX, y: offsetY };
+        ann.content = this.formatDisplayValue(ann.content);
+        currentLine++;
       }
-      ann.horizontalAlignment = 'Left';
     }
+  }
+
+  private formatDisplayValue(raw: string): string {
+    const num = parseFloat(raw);
+    if (!isNaN(num) || /^(true|false)$/i.test(raw)) {
+      return raw.toLowerCase();
+    }
+    return raw.startsWith('"') && raw.endsWith('"') ? raw : `"${raw}"`;
   }
 
   private createIcon(shape: 'Plus' | 'Minus', iconWidth : number, iconHeight: number) {
