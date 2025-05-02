@@ -12,6 +12,11 @@
     <div class="splitter" (mousedown)="onDragStart($event)">
     </div>
     <div class="panel right-panel">
+      <app-hamburger
+        (exportImage)="exportDialog.open()"
+        (rotateLayout)="diagramComp.rotateLayout()"
+        (collapseGraph)="diagramComp.toggleCollapse()">
+      </app-hamburger>
       <app-diagram [nodes]="diagramData.nodes" [connectors]="diagramData.connectors"
         (nodeClicked)="onNodeClick($event)">
       </app-diagram>
@@ -30,3 +35,7 @@
 </div>
 
 <app-node-popup></app-node-popup>
+<app-export-dialog
+  #exportDialog
+  (exportConfirmed)="onExport($event)">
+</app-export-dialog>
