@@ -52,7 +52,6 @@ interface JsonLine {
   `,
   styles: [`
     .popup-content {
-      font-family: Consolas, monospace;
       font-size: 14px;
     }
     .section {
@@ -64,6 +63,7 @@ interface JsonLine {
       margin-bottom: 5px;
     }
     .dialog-box {
+      font-family: Consolas, monospace;
       position: relative;
       background: #f5f5f5;
       border-radius: 5px;
