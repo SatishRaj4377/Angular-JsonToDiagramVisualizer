@@ -1,37 +1,32 @@
+<div class="main-container">
 
-<app-navbar
-  (fileAction)="onFileAction($event)"
-  (viewToggle)="onViewToggle($event)"
-  (themeChange)="onThemeChange($event)"
-  (editorTypeChanged)="editorType = $event">
-</app-navbar>
+  <app-navbar (fileAction)="onFileAction($event)" (viewToggle)="onViewToggle($event)"
+    (themeChange)="onThemeChange($event)" (editorTypeChanged)="editorType = $event">
+  </app-navbar>
 
-<div class="app-container">
-  <div #leftPanel class="panel left-panel">
-    <app-editor
-      [editorType]="editorType"
-      (diagramData)="onDiagramData($event)"
-      (validStatus)="isValid = $event">
-    </app-editor>
+  <div class="app-container">
+    <div #leftPanel class="panel left-panel">
+      <app-editor [editorType]="editorType" (diagramData)="onDiagramData($event)" (validStatus)="isValid = $event">
+      </app-editor>
+    </div>
+    <div class="splitter" (mousedown)="onDragStart($event)">
+    </div>
+    <div class="panel right-panel">
+      <app-diagram [nodes]="diagramData.nodes" [connectors]="diagramData.connectors"
+        (nodeClicked)="onNodeClick($event)">
+      </app-diagram>
+    </div>
   </div>
-  <div
-    class="splitter"
-    (mousedown)="onDragStart($event)">
-  </div>
-  <div class="panel right-panel">
-    <app-diagram
-      [nodes]="diagramData.nodes"
-      [connectors]="diagramData.connectors">
-    </app-diagram>
+  <div class="status-bar">
+    <span class="status-message" [class.invalid]="!isValid">
+      <i *ngIf="isValid" class="e-icons e-check-3"></i>
+      <i *ngIf="!isValid" class="e-icons e-close-6"></i>
+      {{ isValid ? 'Valid' : 'Invalid' }} {{ editorType | uppercase }}
+    </span>
+    <span class="node-count">
+      Nodes: {{ diagramData.nodes.length }}
+    </span>
   </div>
 </div>
-<div class="status-bar">
-  <span class="status-message" [class.invalid]="!isValid">
-    <i *ngIf="isValid" class="e-icons e-check-3"></i>
-    <i *ngIf="!isValid" class="e-icons e-close-6"></i>
-    {{ isValid ? 'Valid' : 'Invalid' }} {{ editorType | uppercase }}
-  </span>
-  <span class="node-count">
-    Nodes: {{ diagramData.nodes.length }}
-  </span>
-</div>
+
+<app-node-popup></app-node-popup>

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { DiagramComponent as EJ2Diagram, DiagramModule, NodeModel, ConnectorModel, DiagramTools, LayoutModel, Annotation, LineDistributionService, ShapeAnnotationModel, ShapeAnnotation } from '@syncfusion/ej2-angular-diagrams';
 import { DataBindingService, HierarchicalTreeService, PrintAndExportService, NodeConstraints, ConnectorConstraints, ConnectionPointOrigin } from '@syncfusion/ej2-angular-diagrams';
 import { DiagramNode } from '../../services/diagram-parser.service';
@@ -19,6 +19,7 @@ import { DiagramNode } from '../../services/diagram-parser.service';
       [getConnectorDefaults]="getConnectorDefaults.bind(this)"
       [nodes]="nodes"
       [connectors]="connectors"
+      (click)="onDiagramClick($event)"
       >
     </ejs-diagram>
   `,
@@ -32,6 +33,7 @@ export class DiagramComponent implements OnInit{
 
   @Input() nodes: NodeModel[] = [];
   @Input() connectors: ConnectorModel[] = [];
+  @Output() nodeClicked = new EventEmitter<{ content: string, path: string }>();
 
   @ViewChild('diagramRef', { static: false, read: EJ2Diagram }) public diagram!: EJ2Diagram;
 
@@ -243,4 +245,15 @@ export class DiagramComponent implements OnInit{
     this.diagram.doLayout();
     this.diagram.fitToPage({ mode: 'Page', region: 'Content', canZoomIn: true });
   }
+
+  public onDiagramClick(args: any) {
+    const element = args.element;
+    if (element && element.data?.actualdata && element.data?.path) {
+      this.nodeClicked.emit({
+        content: element.data.actualdata,
+        path: element.data.path
+      });
+    }
+  }
+
 }

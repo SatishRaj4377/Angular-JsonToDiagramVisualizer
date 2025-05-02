@@ -5,12 +5,13 @@ import { DiagramComponent } from './components/diagram/diagram.component';
 import { DiagramData } from './services/diagram-parser.service';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { FormsModule } from '@angular/forms';
+import { NodePopupComponent } from './components/node-popup/node-popup.component';
 
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [ FormsModule, CommonModule, EditorComponent, DiagramComponent, NavbarComponent ],
+  imports: [ FormsModule, CommonModule, EditorComponent, DiagramComponent, NavbarComponent, NodePopupComponent ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
@@ -18,6 +19,7 @@ export class AppComponent {
   @ViewChild('leftPanel', { static: true }) leftPanel!: ElementRef<HTMLDivElement>;
   @ViewChild(DiagramComponent) diagramCmp!: DiagramComponent;
   @ViewChild(EditorComponent, { static: true }) editorComp!: EditorComponent;
+  @ViewChild(NodePopupComponent) popup!: NodePopupComponent;
 
   editorType: 'json' | 'xml' = 'json';
   isValid = true;
@@ -60,4 +62,8 @@ export class AppComponent {
   onFileAction(action: string) { /* import/export logic here */ }
   onViewToggle(opt: string) { /* toggle grid/count/collapse */ }
   onThemeChange(theme: string) { /* swap CSS link or body class */ }
+
+  onNodeClick(data: { content: string; path: string }) {
+    this.popup.open(data);
+  }
 }
