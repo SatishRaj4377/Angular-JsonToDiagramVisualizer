@@ -627,18 +627,24 @@ export class DiagramParserService {
     nodes: DiagramNode[],
     connectors: DiagramConnector[]
   ): void {
+    // 1) Folder for entire array
     const parentNodeId = parentId
       ? `${parentId}-${this.xmlPascal(tag)}`
       : this.xmlPascal(tag);
-
-    // 1) Folder for array
     nodes.push({
       id: parentNodeId,
       width: this.DEFAULT_NODE_WIDTH,
       height: this.DEFAULT_NODE_HEIGHT,
-      annotations: [{ content: tag }, { content: `{${items.length}}` }],
+      annotations: [
+        { content: tag },
+        { content: `{${items.length}}` }
+      ],
       additionalInfo: { isLeaf: false },
-      data: { path: `${parentPath}.${tag}`, title: tag, actualdata: tag }
+      data: {
+        path: `${parentPath}.${tag}`,
+        title: tag,
+        actualdata: tag
+      }
     });
     if (parentId) {
       connectors.push({
@@ -647,20 +653,24 @@ export class DiagramParserService {
         targetID: parentNodeId
       });
     }
-
-    // 2) Primitive array?
+  
+    // 2) Primitive‑only array?
     if (items.every(it => it.children.length === 0)) {
       items.forEach((it, idx) => {
         const leafId = `${parentNodeId}-${idx}`;
-        const v = it.textContent!.trim();
-        const f = this.xmlFmt(v);
+        const txt    = it.textContent!.trim();
+        const f      = this.xmlFmt(txt);
         nodes.push({
           id: leafId,
           width: this.DEFAULT_NODE_WIDTH,
           height: this.DEFAULT_NODE_HEIGHT,
           annotations: [{ content: f }],
           additionalInfo: { isLeaf: true },
-          data: { path: `${parentPath}.${tag}[${idx}]`, title: f, actualdata: f }
+          data: {
+            path: `${parentPath}.${tag}[${idx}]`,
+            title: f,
+            actualdata: f
+          }
         });
         connectors.push({
           id: `connector-${parentNodeId}-${leafId}`,
@@ -670,8 +680,8 @@ export class DiagramParserService {
       });
       return;
     }
-
-    // 3) Object-array?
+  
+    // 3) “Object‑array” (all items are flat objects) ?
     const isObjectArray = items.every(it => {
       const ch = Array.from(it.children);
       return Object.values(this.xmlGroupByTag(ch))
@@ -680,11 +690,63 @@ export class DiagramParserService {
     if (isObjectArray) {
       items.forEach((it, idx) => {
         const leafId = `${parentNodeId}-${idx}`;
-        const la: Annotation[] = [];
-        const lc: string[] = [];
+        const ann: Annotation[] = [];
+        const lc: string[]      = [];
+        // merge each primitive field
         Array.from(it.children).forEach(ch => {
           const k = ch.tagName, v = ch.textContent!.trim();
-          la.push({ id: `Key_${k}`, content: `${k}:` });
+          ann.push({ id: `Key_${k}`,   content: `${k}:` });
+          ann.push({ id: `Value_${k}`, content: this.xmlFmt(v) });
+          lc.push(`${k}: ${this.xmlFmt(v)}`);
+        });
+        nodes.push({
+          id: leafId,
+          width: this.DEFAULT_NODE_WIDTH,
+          height: this.DEFAULT_NODE_HEIGHT,
+          annotations: ann,
+          additionalInfo: { isLeaf: true },
+          data: {
+            path: `${parentPath}.${tag}[${idx}]`,
+            title: lc.join("\n"),
+            actualdata: lc.join("\n")
+          }
+        });
+        connectors.push({
+          id: `connector-${parentNodeId}-${leafId}`,
+          sourceID: parentNodeId,
+          targetID: leafId
+        });
+      });
+      return;
+    }
+  
+    // 4) “Mixed” case: each item has some primitives AND some nested children
+    const mixed = items.every(it => {
+      const kids = Array.from(it.children);
+      const grp  = this.xmlGroupByTag(kids);
+      const hasPrim    = Object.entries(grp).some(([,arr]) =>
+        arr.length === 1 && arr[0].children.length === 0
+      );
+      const hasComplex = Object.entries(grp).some(([,arr]) =>
+        arr.length > 1 || arr[0].children.length > 0
+      );
+      return hasPrim && hasComplex;
+    });
+    if (mixed) {
+      items.forEach((it, idx) => {
+        const kids = Array.from(it.children);
+        const grp  = this.xmlGroupByTag(kids);
+  
+        // a) merge the primitives into a single leaf under this array item
+        const primKeys = Object.entries(grp)
+          .filter(([,arr]) => arr.length === 1 && arr[0].children.length === 0)
+          .map(([k]) => k);
+        const leafId = `${parentNodeId}-${idx}`;
+        const la: Annotation[] = [];
+        const lc: string[]     = [];
+        primKeys.forEach(k => {
+          const v = grp[k][0].textContent!.trim();
+          la.push({ id: `Key_${k}`,   content: `${k}:` });
           la.push({ id: `Value_${k}`, content: this.xmlFmt(v) });
           lc.push(`${k}: ${this.xmlFmt(v)}`);
         });
@@ -696,8 +758,8 @@ export class DiagramParserService {
           additionalInfo: { isLeaf: true },
           data: {
             path: `${parentPath}.${tag}[${idx}]`,
-            title: lc.join('\n'),
-            actualdata: lc.join('\n')
+            title: lc.join("\n"),
+            actualdata: lc.join("\n")
           }
         });
         connectors.push({
@@ -705,19 +767,48 @@ export class DiagramParserService {
           sourceID: parentNodeId,
           targetID: leafId
         });
+  
+        // b) then recurse into the complex/nested children under that leaf
+        Object.entries(grp)
+          .filter(([,arr]) => arr.length > 1 || arr[0].children.length > 0)
+          .forEach(([childKey, arr]) => {
+            // if an array of primitives, re‑emit as a sub‑array
+            if (arr.length > 1 && arr[0].children.length === 0) {
+              this.xmlEmitArrayBlock(childKey, arr, leafId,
+                `${parentPath}.${tag}[${idx}]`, nodes, connectors
+              );
+            }
+            // array of complex or single complex branch
+            else if (arr.length > 1) {
+              this.xmlEmitArrayBlock(childKey, arr, leafId,
+                `${parentPath}.${tag}[${idx}]`, nodes, connectors
+              );
+            } else {
+              // single nested element → full recursion
+              const nestedEl = arr[0];
+              const childId  = `${leafId}-${this.xmlPascal(childKey)}`;
+              const { nodes: nn, connectors: cc } = this.xmlProc(
+                nestedEl, childId, leafId, childKey,
+                `${parentPath}.${tag}[${idx}].${childKey}`
+              );
+              nodes.push(...nn);
+              connectors.push(...cc);
+            }
+          });
       });
       return;
     }
-
-    // 4) Mixed leaf + nested; or fallback full recursion
+  
+    // 5) Fallback full recursion (if none of the above matched)
     items.forEach((it, idx) => {
-      const itemId = `${parentNodeId}-${idx}`;
-      // full recursion under this item
+      const itemId   = `${parentNodeId}-${idx}`;
+      const itemPath = `${parentPath}.${tag}[${idx}]`;
       const { nodes: nn, connectors: cc } = this.xmlProc(
-        it, itemId, parentNodeId, tag, `${parentPath}.${tag}[${idx}]`
+        it, itemId, parentNodeId, tag, itemPath
       );
       nodes.push(...nn);
       connectors.push(...cc);
     });
   }
+  
 }
