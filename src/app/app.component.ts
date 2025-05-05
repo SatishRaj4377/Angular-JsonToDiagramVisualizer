@@ -135,6 +135,9 @@ export class AppComponent {
     }
   }
   
+  onEditorTypeChanged(type: 'json' | 'xml') {
+    this.editorType = type;
+  }
   
   onNodeClick(data: { content: string; path: string }) {
     this.popup.open(data);

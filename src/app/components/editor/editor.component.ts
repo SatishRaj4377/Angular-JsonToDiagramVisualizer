@@ -67,25 +67,14 @@ export class EditorComponent implements OnInit, OnChanges, OnDestroy {
       const model = editorInstance?.getModel();
       if (model) {
         monaco.editor.setModelLanguage(model, newLanguage);
+        this.editorType = newLanguage;
+        this.onCodeChange();
       }
     });
   }
 
   ngOnDestroy(): void {
     this.editorSubscription.unsubscribe();
-  }
-
-  onLanguageChange(event: Event): void {
-    const newLanguage = (event.target as HTMLSelectElement).value as 'json' | 'xml';
-    this.editorOptions = {
-      ...this.editorOptions,
-      language: newLanguage
-    };
-    const editorInstance = this.monacoEditorComponent.editor;
-    const model = editorInstance?.getModel();
-    if (model){
-      monaco.editor.setModelLanguage(model, newLanguage);
-    }
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -106,6 +95,9 @@ export class EditorComponent implements OnInit, OnChanges, OnDestroy {
         result = this.parser.processXml(this.code);
       }
       this.validStatus.emit(true);
+      if (result.connectors.length === 0 || result.nodes.length === 0) {
+        this.validStatus.emit(false);
+      }
       this.diagramData.emit(result);
     } catch {
       this.validStatus.emit(false);
