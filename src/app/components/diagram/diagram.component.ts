@@ -315,9 +315,9 @@ private determineValueStyle(rawValue: string) {
   refreshLayout() {
     this.diagram.dataBind();
     this.diagram.doLayout();
-    // this.diagram.fitToPage({
-    //   mode: 'Page', region: 'Content', canZoomIn: true
-    // });
+    this.diagram.fitToPage({
+      mode: 'Page', region: 'Content', canZoomIn: true
+    });
   }
 
   public onDiagramClick(args: any) {
