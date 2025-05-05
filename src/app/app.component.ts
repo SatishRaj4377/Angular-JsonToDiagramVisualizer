@@ -10,6 +10,7 @@ import { HamburgerComponent } from './components/hamburger/hamburger.component';
 import { ExportDialogComponent } from './components/export-dialog/export-dialog.component';
 import { FileFormats } from '@syncfusion/ej2-angular-diagrams';
 import { ToolbarComponent } from './components/toolbar/toolbar.component';
+import themeService, { ThemeName } from './services/theme.service';
 
 
 @Component({
@@ -113,17 +114,28 @@ export class AppComponent {
     this.diagramComp.refreshLayout();
   }
 
-  // handle Theme → Light / Dark
   onThemeChange(theme: string) {
-    document.body.classList.toggle('dark-theme', theme === 'dark');
-    // switch Monaco theme
-    // this.editorComp.monacoEditorComponent.editor.ksetMonacoTheme(theme === 'dark' ? 'vs-dark' : 'vs');
-    // update diagram colors (you can wire through your themeService)
-    // this.diagram.setTheme(theme);
-    this.diagramComp.refreshLayout();
+    const isDark = theme === 'dark';
+  
+    // Swap body class (used by your themeService)
+    themeService.setTheme(theme as ThemeName);
+  
+    // Update diagram theme data
+    this.diagramComp.setTheme(theme as ThemeName);
+  
+    // Update Monaco editor theme
+    this.editorComp.monacoEditorComponent.editor?.updateOptions({
+      theme: isDark ? 'vs-dark' : 'vs'
+    });
+  
+    // Swap Syncfusion Material CSS theme link
+    const linkEl = document.getElementById('theme-link') as HTMLLinkElement | null;
+    if (linkEl && linkEl.href.includes('material')) {
+      linkEl.href = linkEl.href.replace(/material(-dark)?\.css/, isDark ? 'material-dark.css' : 'material.css');
+    }
   }
-
-
+  
+  
   onNodeClick(data: { content: string; path: string }) {
     this.popup.open(data);
   }

@@ -1,6 +1,7 @@
 import {
   Component,
-  ViewChild
+  ViewChild,
+  ViewEncapsulation
 } from '@angular/core';
 import { DialogModule, DialogComponent } from '@syncfusion/ej2-angular-popups';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
@@ -31,7 +32,7 @@ interface JsonLine {
           <label>Content</label>
           <div class="dialog-box">
             <div [innerHTML]="contentHtml"></div>
-            <button class="copy-btn" (click)="copy(rawContent)">
+            <button class="copy-btn" (click)="copyContent()">
               <span class="e-icons e-copy"></span>
             </button>
           </div>
@@ -41,7 +42,7 @@ interface JsonLine {
           <label>JSON Path</label>
           <div class="dialog-box">
             <div [innerHTML]="pathHtml"></div>
-            <button class="copy-btn" (click)="copy(rawPath)">
+            <button class="copy-btn" (click)="copyPath()">
               <span class="e-icons e-copy"></span>
             </button>
           </div>
@@ -50,11 +51,30 @@ interface JsonLine {
     </ejs-dialog>
   `,
   styles: [`
+
+    :root {
+      --popup-content-bg: #f9f9f9;
+      --popup-key-color: #5C940D;
+      --popup-value-color: #1864AB;
+    }
+
+    body.dark-theme {
+      --popup-content-bg: #2e2e2e;
+      --popup-key-color: #9acd32;
+      --popup-value-color: #87cefa;
+    }
+
     .popup-content {
       font-size: 14px;
     }
     .section {
       margin-bottom: 15px;
+    }
+    .keyText{
+     color: var(--popup-key-color);
+    }
+    .valueText{
+      color: var(--popup-value-color);
     }
     .section label {
       font-weight: 500;
@@ -64,7 +84,7 @@ interface JsonLine {
     .dialog-box {
       font-family: Consolas, monospace;
       position: relative;
-      background: #f5f5f5;
+      background: var(--popup-content-bg);
       border-radius: 5px;
       padding: 10px;
       overflow-x: auto;
@@ -80,8 +100,14 @@ interface JsonLine {
       background: transparent;
       border: none;
       cursor: pointer;
+      color: #6C757D;
     }
-  `]
+
+    div::-webkit-scrollbar {
+      display: none;
+    }
+  `],
+  encapsulation: ViewEncapsulation.None
 })
 export class NodePopupComponent {
   @ViewChild('dialog', { static: true }) dialog!: DialogComponent;
@@ -93,10 +119,6 @@ export class NodePopupComponent {
   /** Sanitized HTML for binding */
   contentHtml!: SafeHtml;
   pathHtml!: SafeHtml;
-
-  // Placeholder colors (replace with themeService later)
-  private KEY_COLOR   = '#0066CC';
-  private VALUE_COLOR = '#008000';
 
   constructor(private sanitizer: DomSanitizer) {}
 
@@ -123,10 +145,33 @@ export class NodePopupComponent {
     this.dialog.hide();
   }
 
-  /** Copy raw text */
-  copy(text: string) {
-    navigator.clipboard.writeText(text);
+  /** Copy the full, brace‑wrapped JSON block exactly as displayed */
+  copyContent(): void {
+    const json = this.getFormattedJsonString(this.rawContent);
+    navigator.clipboard.writeText(json);
   }
+
+  /** Copy the path, wrapping only the leading 'Root' in { } */
+  copyPath(): void {
+    const wrapped = this.rawPath.startsWith('Root')
+      ? `{Root}${this.rawPath.slice(4)}`
+      : this.rawPath;
+    navigator.clipboard.writeText(wrapped);
+  }
+
+/** Helper: reconstruct the formatted JSON with braces & commas */
+private getFormattedJsonString(raw: string): string {
+  const lines = this.formatJsonLines(raw);
+  if (!lines.length) { 
+    return `"${raw.trim()}"`; 
+  }
+  let out = '{\n';
+  lines.forEach(({ key, value, hasComma }) => {
+    out += `  ${key}: ${value}${hasComma ? ',' : ''}\n`;
+  });
+  return out + '}';
+}
+
 
   /** Build content HTML with key/value coloring and braces */
   private buildContentHtml(raw: string): string {
@@ -135,22 +180,22 @@ export class NodePopupComponent {
 
     if (lines.length === 0) {
       // Single‐line leaf
-      html += `<div style="color:${this.VALUE_COLOR};">"${raw.trim()}"</div>`;
+      html += `<div class="valueText">"${raw.trim()}"</div>`;
     } else {
-      html += `<div>{</div>`;
+      html += `<span>{</span>`;
       lines.forEach(({ key, value, hasComma }) => {
         html += `
           <div>
-            <span
-              style="color:${this.KEY_COLOR}; font-weight:550; margin-left:14px;">
+            <span class="keyText"
+              style="font-weight:550; margin-left:14px;">
               ${key}
             </span>
             <span style="margin:0 3px;">:</span>
-            <span style="color:${this.VALUE_COLOR};">${value}</span>
+            <span class="valueText">${value}</span>
             ${hasComma ? ',' : ''}
           </div>`;
       });
-      html += `<div>}</div>`;
+      html += `<span>}</span>`;
     }
 
     html += `</div>`;

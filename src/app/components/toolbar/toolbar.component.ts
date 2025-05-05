@@ -37,8 +37,29 @@ import {
       align-items: center;
       z-index: 10;
     }
-    ejs-toolbar { margin-right: 12px; }
-    .toolbar-search { width: 180px; }
+    ejs-toolbar { 
+      margin-right: 12px; border:0;
+      borer: 0;
+    }
+
+    .toolbar-search {
+      width: 180px; 
+    }
+
+    .e-toolbar{
+     border: 0;
+    }
+     
+    .e-toolbar .e-toolbar-item .e-tbar-btn{
+      background: #343A401A !important;
+      border-radius: 3px;
+    }
+
+    .diagram-toolbar.e-toolbar .e-toolbar-items {
+      background: transparent !important;
+      margin: 0;
+      padding: 0;
+    }
   `]
 })
 export class ToolbarComponent {

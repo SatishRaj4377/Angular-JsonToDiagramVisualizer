@@ -31,6 +31,7 @@ import {
   ConnectionPointOrigin
 } from '@syncfusion/ej2-angular-diagrams';
 import { DiagramNode } from '../../services/diagram-parser.service';
+import themeService from '../../services/theme.service';
 
 @Component({
   selector: 'app-diagram',
@@ -45,9 +46,11 @@ import { DiagramNode } from '../../services/diagram-parser.service';
   ],
   template: `
     <ejs-diagram
+      id="diagram"
       #diagramRef
       width="100%"
       height="100%"
+      backgroundColor="#F8F9FA"
       [tool]="diagramTools"
       [layout]="layout"
       [getNodeDefaults]="getNodeDefaults.bind(this)"
@@ -57,9 +60,13 @@ import { DiagramNode } from '../../services/diagram-parser.service';
       (click)="onDiagramClick($event)">
     </ejs-diagram>
   `,
-  styles: [`
+  styles: `
     :host { display:block; width:100%; height:100%; }
-  `]
+    #diagramcontent {
+      overflow: hidden !important;
+    }
+  `,
+  encapsulation: ViewEncapsulation.None,
 })
 export class DiagramComponent implements OnInit {
   @Input() nodes: NodeModel[] = [];
@@ -70,16 +77,18 @@ export class DiagramComponent implements OnInit {
 
   public diagramTools!: DiagramTools;
   public layout!: LayoutModel;
-  public snapSettings: SnapSettingsModel = { constraints: SnapConstraints.ShowLines };
+  public snapSettings!: SnapSettingsModel ;
   orientationIndex = 0;
   isGraphCollapsed = false;
   showExpandCollapseIcon = true;
   showChildItemsCount = true;
   currentOrientation: 'LeftToRight' | 'RightToLeft' | 'TopToBottom' | 'BottomToTop' = 'LeftToRight';
   orientations: Array<'LeftToRight'|'TopToBottom'|'RightToLeft'|'BottomToTop'> = ['LeftToRight','TopToBottom','RightToLeft','BottomToTop'];
+  currentThemeSettings = themeService.getCurrentThemeSettings();
 
   ngOnInit(): void {
     this.diagramTools = DiagramTools.ZoomPan | DiagramTools.SingleSelect;
+    this.snapSettings = { constraints: SnapConstraints.ShowLines, horizontalGridlines: { lineColor: this.currentThemeSettings.gridlinesColor}, verticalGridlines: { lineColor: this.currentThemeSettings.gridlinesColor} }
     this.layout = {
       type: 'HierarchicalTree',
       orientation: this.currentOrientation,
@@ -111,7 +120,7 @@ export class DiagramComponent implements OnInit {
       shape: isMainRoot ? 'Ellipse' : 'Rectangle',
       cornerRadius
     };
-    node.style = { fill: 'aqua', strokeColor: 'black', strokeWidth: 1.5 };
+    node.style = { fill: this.currentThemeSettings.nodeFillColor, strokeColor: this.currentThemeSettings.nodeStrokeColor, strokeWidth: 1.5 };
 
     if (isMainRoot) {
       node.width = 40; node.height = 40;
@@ -128,7 +137,7 @@ export class DiagramComponent implements OnInit {
       } else if (node.annotations.length === 2) {
         const keyAnn = node.annotations[0];
         const countAnn = node.annotations[1];
-        keyAnn.style = { fontSize:12, fontFamily:'Consolas', color:'black' };
+        keyAnn.style = { fontSize:12, fontFamily:'Consolas', color: this.currentThemeSettings.textKeyColor };
         keyAnn.offset = { x: this.showChildItemsCount ? 0 : 0.5, y: 0.5 };
         keyAnn.margin = {
           left: this.showChildItemsCount
@@ -140,7 +149,7 @@ export class DiagramComponent implements OnInit {
 
         if (this.showChildItemsCount) {
           countAnn.visibility = true;
-          countAnn.style = { fontSize:12, fontFamily:'Consolas', color:'black' };
+          countAnn.style = { fontSize:12, fontFamily:'Consolas', color: this.currentThemeSettings.textValueColor  };
           countAnn.offset = { x:1, y:0.5 };
           countAnn.horizontalAlignment = 'Right';
           countAnn.margin = {
@@ -222,12 +231,12 @@ export class DiagramComponent implements OnInit {
       if (ann.id.startsWith('Key')) {
         const w = ctx.measureText(ann.content).width;
         ann.style = {
-          fontSize:12, fontFamily:'Consolas', color:'black'
+          fontSize:12, fontFamily:'Consolas', color:this.currentThemeSettings.textKeyColor
         };
         ann.offset = { x:(w/2+padding)/node.width!, y };
       } else {
         ann.style = {
-          fontSize:12, fontFamily:'Consolas', color:'black'
+          fontSize:12, fontFamily:'Consolas', color:this.currentThemeSettings.textValueColor
         };
         const prev = anns[i-1];
         const keyW = prev ? ctx.measureText(prev.content).width : 0;
@@ -238,6 +247,7 @@ export class DiagramComponent implements OnInit {
         ann.content = this.formatDisplayValue(ann.content);
         line++;
       }
+      this.applyAnnotationStyle(ann, ann?.content);
     }
   }
 
@@ -251,13 +261,32 @@ export class DiagramComponent implements OnInit {
       : `"${raw}"`;
   }
 
+  private applyAnnotationStyle(annotation: ShapeAnnotation, rawValue: string) {
+    if (annotation.id.startsWith("Key")) {
+      annotation.style.color = this.currentThemeSettings.textKeyColor;
+    } else if (annotation.id.startsWith("Value")) {
+      annotation.style.color = this.determineValueStyle(rawValue);
+    } else if (annotation.id.startsWith("Count")) {
+      annotation.style.color = this.currentThemeSettings.textValueColor;
+    }
+}
+
+private determineValueStyle(rawValue: string) {
+    if (!isNaN(parseFloat(rawValue))) {
+        return this.currentThemeSettings.numericColor;
+    } else if (rawValue.toLowerCase() === 'true' || rawValue.toLowerCase() === 'false') {
+        return (rawValue.toLowerCase() === 'true') ? this.currentThemeSettings.booleanColor : "red";
+    }
+    return this.currentThemeSettings.textValueColor;
+}
+
   private createIcon(
     shape: 'Plus'|'Minus', w: number, h: number
   ) {
     return {
       shape, width: w, height: h, cornerRadius:3,
       margin: { right: w/2 },
-      fill:'gray', borderColor:'black', iconColor:'black'
+      fill:this.currentThemeSettings.expandIconFillColor, borderColor:this.currentThemeSettings.expandIconBorder, iconColor: this.currentThemeSettings.expandIconColor
     };
   }
 
@@ -277,7 +306,7 @@ export class DiagramComponent implements OnInit {
     connector.constraints =
       ConnectorConstraints.Default | ConnectorConstraints.ReadOnly;
     connector.type = 'Orthogonal';
-    connector.style = { strokeColor:'black', strokeWidth:2 };
+    connector.style = { strokeColor:this.currentThemeSettings.connectorStrokeColor, strokeWidth:2 };
     connector.cornerRadius = 15;
     connector.targetDecorator = { shape:'None' };
     return connector;
@@ -345,11 +374,6 @@ export class DiagramComponent implements OnInit {
   }
 
   public searchNodes(query: string) {
-    const defaultStroke = '#000000';     // black
-    const defaultFill   = '#FFFFFF';     // white
-    const highlightStroke = '#4CAF50';   // green
-    const highlightFill   = '#E8F5E9';   // light green
-  
     (this.diagram.nodes as DiagramNode[]).forEach(node => {
       const elem = document.getElementById(node.id + '_content');
       if (!elem) { return; }
@@ -357,12 +381,12 @@ export class DiagramComponent implements OnInit {
       if (query) {
         const text = (node.data.actualdata as string).toLowerCase();
         const match = text.includes(query.toLowerCase());
-        elem.setAttribute('stroke', match ? highlightStroke : defaultStroke);
-        elem.setAttribute('fill',   match ? highlightFill   : defaultFill);
+        elem.setAttribute('stroke', match ? "lightgreen" : this.currentThemeSettings.nodeStrokeColor);
+        elem.setAttribute('fill',   match ? this.currentThemeSettings.highlightColor : this.currentThemeSettings.nodeFillColor);
       } else {
         // reset to defaults when query is empty
-        elem.setAttribute('stroke', defaultStroke);
-        elem.setAttribute('fill',   defaultFill);
+        elem.setAttribute('stroke', this.currentThemeSettings.nodeStrokeColor);
+        elem.setAttribute('fill',   this.currentThemeSettings.nodeFillColor);
       }
     });
   }
@@ -388,5 +412,19 @@ export class DiagramComponent implements OnInit {
   public toggleExpandIcons(): void {
     this.showExpandCollapseIcon = !this.showExpandCollapseIcon;
     this.diagram.refresh();
+  }
+
+  setTheme(theme: 'light' | 'dark') {
+    themeService.setTheme(theme);
+    this.currentThemeSettings = themeService.getCurrentThemeSettings();
+
+    this.diagram.backgroundColor = this.currentThemeSettings.backgroundColor;
+    const snapSettings = this.diagram.snapSettings;
+    if (snapSettings && snapSettings.verticalGridlines && snapSettings.horizontalGridlines) {
+      snapSettings.verticalGridlines.lineColor = this.currentThemeSettings.gridlinesColor;
+      snapSettings.horizontalGridlines.lineColor = this.currentThemeSettings.gridlinesColor;
+    }
+    this.diagram.refresh();
+    this.refreshLayout();
   }
 }

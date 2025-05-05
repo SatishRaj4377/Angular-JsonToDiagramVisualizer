@@ -24,6 +24,17 @@ import {
       [items]="menuItems"
       (select)="onSelect($event)">
     </button>
+  `,
+  styles: `
+    button[ejs-dropdownbutton]{
+     background: #343A401A;
+    }
+    button[ejs-dropdownbutton] .e-icons.e-menu {
+      font-size: 16px;
+    }
+    :host-context(.dark-theme) button[ejs-dropdownbutton]{
+      background-color: #3A3A3A;
+    }
   `
 })
 export class HamburgerComponent {
