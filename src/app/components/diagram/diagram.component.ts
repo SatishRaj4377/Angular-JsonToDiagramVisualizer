@@ -315,11 +315,10 @@ private determineValueStyle(rawValue: string) {
   }
 
   refreshLayout() {
+    this.diagram.refresh();
     this.diagram.dataBind();
     this.diagram.doLayout();
-    this.diagram.fitToPage({
-      mode: 'Page', region: 'Content', canZoomIn: true
-    });
+    this.diagram.fitToPage();
   }
 
   public onDiagramClick(args: any) {
@@ -344,9 +343,7 @@ private determineValueStyle(rawValue: string) {
       if (n.collapseIcon) this.updateIconOffset(n.collapseIcon);
     });
     this.diagram.dataBind();
-    this.diagram.fitToPage({
-      mode:'Page', region:'Content', canZoomIn:true
-    });
+    this.diagram.fitToPage();
   }
 
   public toggleCollapse(): void {
@@ -426,7 +423,6 @@ private determineValueStyle(rawValue: string) {
       snapSettings.verticalGridlines.lineColor = this.currentThemeSettings.gridlinesColor;
       snapSettings.horizontalGridlines.lineColor = this.currentThemeSettings.gridlinesColor;
     }
-    this.diagram.refresh();
     this.refreshLayout();
   }
 }
