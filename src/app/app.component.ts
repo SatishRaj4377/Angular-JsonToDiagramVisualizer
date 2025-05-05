@@ -155,7 +155,7 @@ export class AppComponent {
       case 'reset':
         this.diagramComp.diagram.reset(); break;
       case 'fitToPage':
-        this.diagramComp.diagram.fitToPage(); break;
+        this.diagramComp.diagram.fitToPage({ region: 'Content', canZoomIn: true }); break;
       case 'zoomIn':
         this.diagramComp.diagram.zoomTo({ type:'ZoomIn', zoomFactor:0.2 }); break;
       case 'zoomOut':

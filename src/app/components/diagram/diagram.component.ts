@@ -318,7 +318,9 @@ private determineValueStyle(rawValue: string) {
     this.diagram.refresh();
     this.diagram.dataBind();
     this.diagram.doLayout();
-    this.diagram.fitToPage();
+    this.diagram.fitToPage({
+      region: 'Content', canZoomIn: true
+    });
   }
 
   public onDiagramClick(args: any) {
