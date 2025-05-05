@@ -95,7 +95,7 @@ export class EditorComponent implements OnInit, OnChanges, OnDestroy {
         result = this.parser.processXml(this.code);
       }
       this.validStatus.emit(true);
-      if (result.connectors.length === 0 || result.nodes.length === 0) {
+      if (result.connectors.length === 0 && result.nodes.length === 0) {
         this.validStatus.emit(false);
       }
       this.diagramData.emit(result);

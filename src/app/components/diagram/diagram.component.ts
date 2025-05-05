@@ -243,8 +243,10 @@ export class DiagramComponent implements OnInit {
         const valW = ctx.measureText(ann.content).width;
         const keyX = (keyW/2)/node.width!;
         const valX = ((keyX*2)+(valW/2)/node.width!)+(padding+8)/node.width!;
-        ann.offset = { x: valX, y };
-        ann.content = this.formatDisplayValue(ann.content);
+        if (prev){
+          ann.offset = { x: valX, y };
+          ann.content = this.formatDisplayValue(ann.content);
+        }
         line++;
       }
       this.applyAnnotationStyle(ann, ann?.content);
