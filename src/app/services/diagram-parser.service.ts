@@ -11,7 +11,7 @@ export interface NodeData {
   path: string;
   title: string;
   actualdata: string;
-  displayContent?: any;    // only for non-leaf JSON nodes
+  displayContent?: any;
 }
 
 export interface DiagramNode {

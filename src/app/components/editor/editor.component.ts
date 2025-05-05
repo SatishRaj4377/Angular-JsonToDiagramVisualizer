@@ -53,6 +53,7 @@ export class EditorComponent implements OnInit, OnChanges, OnDestroy {
   private editorSubscription!: Subscription;
   private editorService = inject(EditorService);
 
+  // fetch sample.json from assets and set it as the initial code
   ngOnInit(): void {
     if (!this.isBrowser) return;
     // load sample.json from assets
@@ -77,6 +78,7 @@ export class EditorComponent implements OnInit, OnChanges, OnDestroy {
     this.editorSubscription.unsubscribe();
   }
 
+  // update Monaco language when editorType changes
   ngOnChanges(changes: SimpleChanges) {
     if (!this.isBrowser) return;
     if (changes['editorType'] && !changes['editorType'].firstChange) {
@@ -85,6 +87,7 @@ export class EditorComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
+  // update diagram data when code changes
   onCodeChange() {
     try {
       let result: DiagramData;
@@ -104,6 +107,7 @@ export class EditorComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
+  // update Monaco editor layout when window resizes
   layoutEditor(): void {
     this.monacoEditorComponent?.editor?.layout();
   }

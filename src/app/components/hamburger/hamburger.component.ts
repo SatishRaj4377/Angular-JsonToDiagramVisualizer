@@ -54,6 +54,7 @@ export class HamburgerComponent {
     { text: 'Collapse Graph',  id: 'collapseGraph', iconCss: 'e-icons e-collapse-2' }
   ];
 
+  // emits the event based on the menu item selected
   onSelect(args: MenuEventArgs) {
     switch (args.item.id) {
       case 'exportImage':
@@ -69,6 +70,7 @@ export class HamburgerComponent {
     }
   }
 
+  // toggles the collapse graph menu item text between collapsed and expanded states
   private toggleCollapseItem() {
     const item = this.menuItems.find(i => i.id === 'collapseGraph')!;
     this.isCollapsed = !this.isCollapsed;

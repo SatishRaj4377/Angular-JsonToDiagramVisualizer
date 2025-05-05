@@ -159,19 +159,18 @@ export class NodePopupComponent {
     navigator.clipboard.writeText(wrapped);
   }
 
-/** Helper: reconstruct the formatted JSON with braces & commas */
-private getFormattedJsonString(raw: string): string {
-  const lines = this.formatJsonLines(raw);
-  if (!lines.length) { 
-    return `"${raw.trim()}"`; 
+  /** Helper: reconstruct the formatted JSON with braces & commas */
+  private getFormattedJsonString(raw: string): string {
+    const lines = this.formatJsonLines(raw);
+    if (!lines.length) { 
+      return `"${raw.trim()}"`; 
+    }
+    let out = '{\n';
+    lines.forEach(({ key, value, hasComma }) => {
+      out += `  ${key}: ${value}${hasComma ? ',' : ''}\n`;
+    });
+    return out + '}';
   }
-  let out = '{\n';
-  lines.forEach(({ key, value, hasComma }) => {
-    out += `  ${key}: ${value}${hasComma ? ',' : ''}\n`;
-  });
-  return out + '}';
-}
-
 
   /** Build content HTML with key/value coloring and braces */
   private buildContentHtml(raw: string): string {

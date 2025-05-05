@@ -72,10 +72,12 @@ export class ToolbarComponent {
     { prefixIcon: 'e-icons e-zoom-out',    tooltipText: 'Zoom Out',   id: 'zoomOut',   cssClass: 'e-flat' }
   ];
 
+  // emits the event based on the toolbar item clicked
   onToolClicked(ev: ClickEventArgs) {
     this.toolClick.emit(ev.item.id as any);
   }
 
+  // emits the event based on the search box value changed
   onSearch(ev: any) {
     let val = '';
     // Syncfusion ChangeEventArgs from ejs-textbox:

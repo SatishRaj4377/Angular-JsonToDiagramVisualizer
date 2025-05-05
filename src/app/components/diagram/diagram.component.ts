@@ -56,7 +56,9 @@ import themeService from '../../services/theme.service';
       [getNodeDefaults]="getNodeDefaults.bind(this)"
       [getConnectorDefaults]="getConnectorDefaults.bind(this)"
       [nodes]="nodes"
-      [connectors]="connectors" [snapSettings]="snapSettings" [scrollSettings]="{scrollLimit: 'Infinity'}"
+      [connectors]="connectors" 
+      [snapSettings]="snapSettings" 
+      [scrollSettings]="{scrollLimit: 'Infinity'}"
       (click)="onDiagramClick($event)">
     </ejs-diagram>
   `,
@@ -98,6 +100,8 @@ export class DiagramComponent implements OnInit {
     };
   }
 
+  // This method initializes and returns a NodeModel with default settings depending on whether it is a main root, leaf, or a regular node.
+  // It sets visual properties such as shape, size, and style based on node type and adjusts constraints and expand icons appropriately.
   getNodeDefaults(node: NodeModel): NodeModel {
     const isLeaf = (node as DiagramNode).additionalInfo?.isLeaf === true;
     const isMainRoot = node.id === 'main-root';
@@ -176,6 +180,7 @@ export class DiagramComponent implements OnInit {
     return node;
   }
 
+  // Calculates node size based on annotations
   private calculateNodeSize(
     node: NodeModel, fontSpec: string,
     padding: number, lineHeight: number, iconW: number
@@ -212,6 +217,7 @@ export class DiagramComponent implements OnInit {
     return { width, height };
   }
 
+  // Position the annotations on the leaf nodes
   private layoutLeafAnnotations(
     node: NodeModel, fontSpec: string,
     padding: number, lineHeight: number
@@ -253,6 +259,7 @@ export class DiagramComponent implements OnInit {
     }
   }
 
+  // Format the display value for annotations
   private formatDisplayValue(raw: string): string {
     const num = parseFloat(raw);
     if (!isNaN(num) || /^(true|false)$/i.test(raw)) {
@@ -263,6 +270,7 @@ export class DiagramComponent implements OnInit {
       : `"${raw}"`;
   }
 
+  // Apply annotation styles based on the annotation type
   private applyAnnotationStyle(annotation: ShapeAnnotation, rawValue: string) {
     if (annotation.id.startsWith("Key")) {
       annotation.style.color = this.currentThemeSettings.textKeyColor;
@@ -271,17 +279,19 @@ export class DiagramComponent implements OnInit {
     } else if (annotation.id.startsWith("Count")) {
       annotation.style.color = this.currentThemeSettings.textValueColor;
     }
-}
+  }
 
-private determineValueStyle(rawValue: string) {
-    if (!isNaN(parseFloat(rawValue))) {
-        return this.currentThemeSettings.numericColor;
-    } else if (rawValue.toLowerCase() === 'true' || rawValue.toLowerCase() === 'false') {
-        return (rawValue.toLowerCase() === 'true') ? this.currentThemeSettings.booleanColor : "red";
-    }
-    return this.currentThemeSettings.textValueColor;
-}
+  // Determine the style for the annotation text based on its type
+  private determineValueStyle(rawValue: string) {
+      if (!isNaN(parseFloat(rawValue))) {
+          return this.currentThemeSettings.numericColor;
+      } else if (rawValue.toLowerCase() === 'true' || rawValue.toLowerCase() === 'false') {
+          return (rawValue.toLowerCase() === 'true') ? this.currentThemeSettings.booleanColor : "red";
+      }
+      return this.currentThemeSettings.textValueColor;
+  }
 
+  // Creates expand and collapse icon for node
   private createIcon(
     shape: 'Plus'|'Minus', w: number, h: number
   ) {
@@ -292,6 +302,7 @@ private determineValueStyle(rawValue: string) {
     };
   }
 
+  // Update the icon offset based on the current orientation of the diagram
   private updateIconOffset(icon: any) {
     if (this.currentOrientation==='TopToBottom') {
       icon.offset = { x:1, y:0.5 };
@@ -304,6 +315,7 @@ private determineValueStyle(rawValue: string) {
     }
   }
 
+  // sets the default values for the connectors in the diagram
   getConnectorDefaults(connector: ConnectorModel): ConnectorModel {
     connector.constraints =
       ConnectorConstraints.Default | ConnectorConstraints.ReadOnly;
@@ -314,6 +326,7 @@ private determineValueStyle(rawValue: string) {
     return connector;
   }
 
+  // refreshes the diagram layout and fits it to the page
   refreshLayout() {
     this.diagram.refresh();
     this.diagram.dataBind();
@@ -323,6 +336,7 @@ private determineValueStyle(rawValue: string) {
     });
   }
 
+  // Triggers popup that displays popup
   public onDiagramClick(args: any) {
     const e = args.element;
     if (e?.data?.actualdata && e.data?.path && args.actualObject) {
@@ -333,6 +347,7 @@ private determineValueStyle(rawValue: string) {
     }
   }
 
+  // Rotates the layout of the diagram between different orientations
   public rotateLayout(): void {
     this.orientationIndex =
       (this.orientationIndex + 1) % this.orientations.length;
@@ -348,6 +363,7 @@ private determineValueStyle(rawValue: string) {
     this.diagram.fitToPage();
   }
 
+  // Toggles the collapse state of the diagram nodes
   public toggleCollapse(): void {
     const nodes = this.diagram.nodes;
     if (this.isGraphCollapsed) {
@@ -374,6 +390,7 @@ private determineValueStyle(rawValue: string) {
     this.diagram.doLayout();
   }
 
+  // searches for nodes in the diagram based on a query string
   public searchNodes(query: string) {
     (this.diagram.nodes as DiagramNode[]).forEach(node => {
       const elem = document.getElementById(node.id + '_content');
@@ -392,7 +409,7 @@ private determineValueStyle(rawValue: string) {
     });
   }
   
-  
+  // toggles the visibility of grid lines in the diagram
   public toggleGridLines(): void {
     const snap = this.diagram?.snapSettings;
     if (!snap || typeof snap.constraints === 'undefined') return;
@@ -404,17 +421,19 @@ private determineValueStyle(rawValue: string) {
     }
   }
   
-
+  // toggles the visibility of child item count annotation in the diagram nodes
   public toggleChildCount(): void {
     this.showChildItemsCount = !this.showChildItemsCount;
     this.diagram.refresh();
   }
   
+  // toggles the visibility of expand/collapse icons in the diagram nodes
   public toggleExpandIcons(): void {
     this.showExpandCollapseIcon = !this.showExpandCollapseIcon;
     this.diagram.refresh();
   }
 
+  // update the diagram based on the selected theme
   setTheme(theme: 'light' | 'dark') {
     themeService.setTheme(theme);
     this.currentThemeSettings = themeService.getCurrentThemeSettings();
