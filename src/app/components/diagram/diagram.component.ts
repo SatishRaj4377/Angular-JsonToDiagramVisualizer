@@ -56,7 +56,7 @@ import themeService from '../../services/theme.service';
       [getNodeDefaults]="getNodeDefaults.bind(this)"
       [getConnectorDefaults]="getConnectorDefaults.bind(this)"
       [nodes]="nodes"
-      [connectors]="connectors" [snapSettings]="snapSettings"
+      [connectors]="connectors" [snapSettings]="snapSettings" [scrollSettings]="{scrollLimit: 'Infinity'}"
       (click)="onDiagramClick($event)">
     </ejs-diagram>
   `,

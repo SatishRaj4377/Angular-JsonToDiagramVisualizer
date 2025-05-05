@@ -39,7 +39,6 @@ import {
     }
     ejs-toolbar { 
       margin-right: 12px; border:0;
-      borer: 0;
     }
 
     .toolbar-search {
