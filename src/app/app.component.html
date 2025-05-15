@@ -23,6 +23,7 @@
 
     <!-- Right: diagram + overlayed hamburger & toolbar -->
     <div class="panel right-panel">
+      <app-spinner [visible]="!isValid"></app-spinner>
       <app-hamburger
         (exportImage)="exportDialog.open()"
         (rotateLayout)="diagramComp.rotateLayout()"

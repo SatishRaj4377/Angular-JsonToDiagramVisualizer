@@ -11,12 +11,13 @@ import { ExportDialogComponent } from './components/export-dialog/export-dialog.
 import { FileFormats } from '@syncfusion/ej2-angular-diagrams';
 import { ToolbarComponent } from './components/toolbar/toolbar.component';
 import themeService, { ThemeName } from './services/theme.service';
+import { SpinnerComponent } from './components/spinner/spinner.component';
 
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [ FormsModule, CommonModule, EditorComponent, DiagramComponent, NavbarComponent, NodePopupComponent, HamburgerComponent, ExportDialogComponent, ToolbarComponent],
+  imports: [ FormsModule, CommonModule, EditorComponent, DiagramComponent, NavbarComponent, NodePopupComponent, HamburgerComponent, ExportDialogComponent, ToolbarComponent, SpinnerComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
@@ -26,6 +27,7 @@ export class AppComponent {
   @ViewChild(EditorComponent, { static: true }) editorComp!: EditorComponent;
   @ViewChild(NodePopupComponent) popup!: NodePopupComponent;
   @ViewChild('exportDialog', { static: true }) exportDialog!: ExportDialogComponent;
+  @ViewChild(SpinnerComponent) spinner!: SpinnerComponent;
 
   editorType: 'json' | 'xml' = 'json';
   isValid = true;
@@ -61,8 +63,10 @@ export class AppComponent {
   //#endregion
   
   onDiagramData(data: DiagramData) {
+    this.spinner.visible = true;
     this.diagramData = data;
     setTimeout(() => this.diagramComp.refreshLayout());
+    this.spinner.visible = false;
   }
 
   onFileAction(action: string) {
@@ -86,12 +90,12 @@ export class AppComponent {
       input.click();
     } else {
       // export current editor content
-      const text      = this.editorComp.monacoEditorComponent.editor?.getValue() || " ";
-      const ext       = this.editorComp.editorType;
-      const blob      = new Blob([text], { type: 'text/plain' });
-      const link      = document.createElement('a');
-      link.href       = URL.createObjectURL(blob);
-      link.download   = `Diagram.${ext}`;
+      const text = this.editorComp.monacoEditorComponent.editor?.getValue() || " ";
+      const ext = this.editorComp.editorType;
+      const blob = new Blob([text], { type: 'text/plain' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `Diagram.${ext}`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -115,6 +119,7 @@ export class AppComponent {
   }
 
   onThemeChange(theme: string) {
+    this.spinner.visible = true;
     const isDark = theme === 'dark';
   
     // Swap body class (used by your themeService)
@@ -133,6 +138,7 @@ export class AppComponent {
     if (linkEl && linkEl.href.includes('tailwind')) {
       linkEl.href = linkEl.href.replace(/tailwind(-dark)?\.css/, isDark ? 'tailwind-dark.css' : 'tailwind.css');
     }
+    this.spinner.visible = false;
   }
   
   onEditorTypeChanged(type: 'json' | 'xml') {
