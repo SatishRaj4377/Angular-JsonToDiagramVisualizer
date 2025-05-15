@@ -29,7 +29,7 @@ import { EditorService } from '../../services/editor.service';
   styleUrls: ['./navbar.component.css']
 })
 export class NavbarComponent {
-  navTitle = "{ } JSON To Diagram Visualizer";
+  navTitle = "{ } JSON To Diagram";
 
   public fileItems: ItemModel[] = [
     { text: 'Import', id: 'import' , iconCss: 'e-icons e-import' },
@@ -93,6 +93,7 @@ export class NavbarComponent {
     if (event.value === 'json' || event.value === 'xml') {
       this.editorService.setLanguage(event.value);
       this.editorTypeChanged.emit(event.value);
+      this.navTitle = `{ } ${(event.value as string).toUpperCase()} To Diagram`;
     }
   }
 }
