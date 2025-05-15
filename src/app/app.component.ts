@@ -128,10 +128,10 @@ export class AppComponent {
       theme: isDark ? 'vs-dark' : 'vs'
     });
   
-    // Swap Syncfusion Material CSS theme link
+    // Swap Syncfusion tailwind CSS theme link
     const linkEl = document.getElementById('theme-link') as HTMLLinkElement | null;
-    if (linkEl && linkEl.href.includes('material')) {
-      linkEl.href = linkEl.href.replace(/material(-dark)?\.css/, isDark ? 'material-dark.css' : 'material.css');
+    if (linkEl && linkEl.href.includes('tailwind')) {
+      linkEl.href = linkEl.href.replace(/tailwind(-dark)?\.css/, isDark ? 'tailwind-dark.css' : 'tailwind.css');
     }
   }
   

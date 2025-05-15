@@ -16,7 +16,8 @@ import { EditorService } from '../../services/editor.service';
       </div>
       <div class="navbar-right">
         <ejs-dropdownlist
-          [width]="'70px'"
+          id="editorType"
+          [width]="'90px'"
           [dataSource]="editorTypes"
           [value]="selectedEditorType"
           [fields]="{ text: 'text', value: 'value' }"

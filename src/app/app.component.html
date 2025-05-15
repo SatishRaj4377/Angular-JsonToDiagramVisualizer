@@ -46,8 +46,8 @@
   <!-- Status bar at the very bottom -->
   <div class="status-bar">
     <span class="status-message" [class.invalid]="!isValid">
-      <i *ngIf="isValid" class="e-icons e-check-3"></i>
-      <i *ngIf="!isValid" class="e-icons e-close-6"></i>
+      <i *ngIf="isValid" class="e-icons e-check"></i>
+      <i *ngIf="!isValid" class="e-icons e-close"></i>
       {{ isValid ? 'Valid' : 'Invalid' }} {{ editorType | uppercase }}
     </span>
     <span class="node-count">

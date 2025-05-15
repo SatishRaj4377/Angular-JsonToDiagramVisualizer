@@ -1,7 +1,6 @@
 /* Overall container */
 .navbar {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   height: 46px;
   padding: 0 16px;
@@ -33,6 +32,8 @@ button[ejs-dropdownbutton] {
   padding: 6px 12px;
   font-size: 0.875rem;
   background-color: transparent;
+  border: 0;
+  box-shadow: none !important;
 }
 
 /* Right side (editor type switch) */
@@ -59,4 +60,10 @@ button[ejs-dropdownbutton] {
 
 :host-context(.dark-theme) button[ejs-dropdownbutton]:hover {
   background-color: #3a3a3a;
+}
+
+#editorType > span{
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
 }

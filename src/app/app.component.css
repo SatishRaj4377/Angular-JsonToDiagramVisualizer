@@ -50,7 +50,7 @@ app-toolbar {
 }
 
 .status-bar {
-  height: 20px;
+  height: 24px;
   line-height: 32px;
   padding: 0 12px;
   background-color: rgb(236, 236, 236);
@@ -64,8 +64,8 @@ app-toolbar {
 
 .status-message i {
   vertical-align: middle;
-  margin-right: -2.5px;
-  font-size: .7rem;
+  margin-right: -4px;
+  font-size: .9rem;
 }
 
 .status-message.invalid {
