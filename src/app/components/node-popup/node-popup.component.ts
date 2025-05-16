@@ -53,15 +53,15 @@ interface JsonLine {
   styles: [`
 
     :root {
-      --popup-content-bg: #f9f9f9;
+      --popup-content-bg: #f0f0f0;
       --popup-key-color: #5C940D;
       --popup-value-color: #1864AB;
     }
 
     body.dark-theme {
-      --popup-content-bg: #2e2e2e;
-      --popup-key-color: #9acd32;
-      --popup-value-color: #87cefa;
+      --popup-content-bg: #01000c57;
+      --popup-key-color: #A5D8FF;
+      --popup-value-color: #40C057;
     }
 
     .popup-content {
