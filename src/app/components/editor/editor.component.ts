@@ -62,15 +62,17 @@ export class EditorComponent implements OnInit, OnChanges, OnDestroy {
     if (!this.isBrowser) return;
 
     fetch('/assets/data/sample.json')
-      .then(r => r.json())
-      .then(json => this.code = JSON.stringify(json, null, 2))
+      .then((r) => r.json())
+      .then((json) => (this.code = JSON.stringify(json, null, 2)))
       .finally(() => this.onCodeChange());
 
-    this.editorSubscription = this.editorService.language$.subscribe(newLanguage => {
-      if (newLanguage !== this.editorType) {
-        this.switchEditorType(newLanguage);
+    this.editorSubscription = this.editorService.language$.subscribe(
+      (newLanguage) => {
+        if (newLanguage !== this.editorType) {
+          this.switchEditorType(newLanguage);
+        }
       }
-    });
+    );
   }
 
   ngOnDestroy(): void {
@@ -89,36 +91,60 @@ export class EditorComponent implements OnInit, OnChanges, OnDestroy {
     let displayContent = current;
     let jsonObject: any;
 
-    this.validStatus.emit(false); // show spinner/loading state
+    this.validStatus.emit(false); // show spinner/loading
 
     try {
       if (targetType === 'xml') {
-        // current content may be JSON or XML
+        // Detect whether current is XML or JSON
         if (current.trim().startsWith('<')) {
-          // It's XML: parse to JSON first
           const wrapped = `<root>${current}</root>`;
-          const result = await xml2js.parseStringPromise(wrapped, { explicitArray: false });
+          const result = await xml2js.parseStringPromise(wrapped, {
+            explicitArray: false,
+          });
           jsonObject = result.root;
         } else {
-          // It's JSON
           jsonObject = JSON.parse(current);
         }
-
         const keys = Object.keys(jsonObject);
-        if (keys.length === 1) {
-          const rootKey = keys[0];
-          displayContent = js2xmlparser.parse(rootKey, jsonObject[rootKey], {
-            declaration: { include: false }
-          });
-        } else {
-          displayContent = js2xmlparser.parse('root', jsonObject, {
-            declaration: { include: false }
-          });
-        }
+
+        displayContent = keys
+          .map((key) => {
+            const value = jsonObject[key];
+
+            // Case: array of primitives → emit <key>value</key> for each
+            if (Array.isArray(value) && typeof value[0] !== 'object') {
+              return value
+                .map((item) =>
+                  js2xmlparser.parse(key, item, {
+                    declaration: { include: false },
+                  })
+                )
+                .join('\n');
+
+              // Case: array of objects → emit <key>...</key> for each object
+            } else if (Array.isArray(value)) {
+              return value
+                .map((item) =>
+                  js2xmlparser.parse(key, item, {
+                    declaration: { include: false },
+                  })
+                )
+                .join('\n');
+
+              // Case: non-array → serialize normally
+            } else {
+              return js2xmlparser.parse(key, value, {
+                declaration: { include: false },
+              });
+            }
+          })
+          .join('\n');
       } else {
-        // switching to JSON: convert XML → JSON
+        // Switching to JSON: assume XML → convert to JSON object
         const wrappedXml = `<root>${current}</root>`;
-        const result = await xml2js.parseStringPromise(wrappedXml, { explicitArray: false });
+        const result = await xml2js.parseStringPromise(wrappedXml, {
+          explicitArray: false,
+        });
         jsonObject = result.root;
         displayContent = JSON.stringify(jsonObject, null, 2);
       }
@@ -154,13 +180,14 @@ export class EditorComponent implements OnInit, OnChanges, OnDestroy {
       } else if (this.editorType === 'xml') {
         // Validate if the code can actually be XML
         if (!this.code.trim().startsWith('<')) {
-          throw new Error("Invalid XML format");
+          throw new Error('Invalid XML format');
         }
         
         // Attempt to parse as XML
         const wrapped = `<root>${this.code}</root>`;
-        xml2js.parseStringPromise(wrapped, { explicitArray: false })
-          .then(json => this.runParser(json.root))
+        xml2js
+          .parseStringPromise(wrapped, { explicitArray: false })
+          .then((json) => this.runParser(json.root))
           .catch(() => this.validStatus.emit(false));
       }
     } catch (error) {
