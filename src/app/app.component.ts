@@ -28,6 +28,7 @@ export class AppComponent {
   @ViewChild(NodePopupComponent) popup!: NodePopupComponent;
   @ViewChild('exportDialog', { static: true }) exportDialog!: ExportDialogComponent;
   @ViewChild(SpinnerComponent) spinner!: SpinnerComponent;
+  @ViewChild(ToolbarComponent) toolbar!: ToolbarComponent;
 
   editorType: 'json' | 'xml' = 'json';
   isValid = true;
@@ -64,6 +65,7 @@ export class AppComponent {
   
   onDiagramData(data: DiagramData) {
     this.spinner.visible = true;
+    this.toolbar.clearSearchText();
     this.diagramData = data;
     setTimeout(() => this.diagramComp.refreshLayout());
     this.spinner.visible = false;
@@ -139,6 +141,7 @@ export class AppComponent {
       linkEl.href = linkEl.href.replace(/tailwind(-dark)?\.css/, isDark ? 'tailwind-dark.css' : 'tailwind.css');
     }
     this.spinner.visible = false;
+    this.toolbar.clearSearchText();
   }
   
   onEditorTypeChanged(type: 'json' | 'xml') {

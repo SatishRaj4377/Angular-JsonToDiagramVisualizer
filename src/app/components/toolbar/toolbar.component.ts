@@ -2,7 +2,8 @@ import {
   Component,
   Output,
   EventEmitter,
-  ViewEncapsulation
+  ViewEncapsulation,
+  ViewChild
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -11,6 +12,7 @@ import {
   ItemModel
 } from '@syncfusion/ej2-angular-navigations';
 import {
+  TextBoxComponent,
   TextBoxModule
 } from '@syncfusion/ej2-angular-inputs';
 
@@ -25,7 +27,8 @@ import {
         [items]="toolbarItems"
         (clicked)="onToolClicked($event)">
       </ejs-toolbar>
-      <ejs-textbox
+      <ejs-textbox 
+        #textbox
         cssClass="toolbar-search"
         placeholder="Search Node"
         (input)="onSearch($event)" />
@@ -65,6 +68,8 @@ export class ToolbarComponent {
   @Output() toolClick   = new EventEmitter<'reset'|'fitToPage'|'zoomIn'|'zoomOut'>();
   @Output() searchNode  = new EventEmitter<string>();
 
+  @ViewChild('textbox', { static: false }) textbox!: TextBoxComponent;
+
   public toolbarItems: ItemModel[] = [
     { prefixIcon: 'e-icons e-reset',      tooltipText: 'Reset',      id: 'reset',     cssClass: 'e-flat' },
     { prefixIcon: 'e-icons e-zoom-to-fit', tooltipText: 'Fit To Page',id: 'fitToPage', cssClass: 'e-flat' },
@@ -89,5 +94,11 @@ export class ToolbarComponent {
       val = (ev.target as HTMLInputElement).value;
     }
     this.searchNode.emit(val.trim());
+  }
+
+  clearSearchText() {
+    if (this.textbox) {
+      this.textbox.value = '';
+    }
   }
 }
