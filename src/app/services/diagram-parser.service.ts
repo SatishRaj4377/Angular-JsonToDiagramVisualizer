@@ -105,6 +105,7 @@ export class DiagramParserService {
 
     // 4. Create a node for each non-leaf property
     nonLeafKeys.forEach(key => {
+      if (this.isEmpty(data[key])) return;
       const nodeId = this.convertUnderScoreToPascalCase(key);
       const childCount = this.getObjectLength(data[key]);
       const annotations: Annotation[] = [{ content: key }];
@@ -209,7 +210,7 @@ export class DiagramParserService {
 
           // Recurse into any child objects/arrays
           Object.entries(item)
-            .filter(([, v]) => v && typeof v === 'object')
+            .filter(([, v]) => v && typeof v === 'object' && !this.isEmpty(v))
             .forEach(([childKey, childValue]) => {
               const childId = this.convertUnderScoreToPascalCase(
                 `${baseId}-${childKey}`
@@ -311,6 +312,7 @@ export class DiagramParserService {
     // Recurse into nested objects
     objKeys.forEach(prop => {
       const childValue = (element as any)[prop];
+      if (this.isEmpty(childValue)) return;
       const childCount = this.getObjectLength(childValue);
       const childId    = this.convertUnderScoreToPascalCase(`${parentId}-${prop}`);
       const childAnns: Annotation[] = [{ content: prop }];
@@ -402,6 +404,12 @@ export class DiagramParserService {
         });
       });
     }
+  }
+
+  private isEmpty(value: any): boolean {
+    if (Array.isArray(value)) return value.length === 0;
+    if (value && typeof value === 'object') return Object.keys(value).length === 0;
+    return false;
   }
 
   // /**
