@@ -359,7 +359,6 @@ export class DiagramComponent implements OnInit {
       if (n.expandIcon)   this.updateIconOffset(n.expandIcon);
       if (n.collapseIcon) this.updateIconOffset(n.collapseIcon);
     });
-    this.diagram.dataBind();
     this.diagram.fitToPage();
   }
 
@@ -386,8 +385,6 @@ export class DiagramComponent implements OnInit {
       });
       this.isGraphCollapsed = true;
     }
-    this.diagram.dataBind();
-    this.diagram.doLayout();
   }
 
   // searches for nodes in the diagram based on a query string

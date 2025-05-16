@@ -29,9 +29,11 @@
     "@syncfusion/ej2-angular-popups": "^29.1.37",
     "@syncfusion/ej2-angular-splitbuttons": "^29.1.33",
     "express": "^4.18.2",
+    "js2xmlparser": "^5.0.0",
     "monaco-editor": "^0.52.2",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
+    "xml2js": "^0.6.2",
     "zone.js": "~0.15.0"
   },
   "devDependencies": {
@@ -41,6 +43,7 @@
     "@types/express": "^4.17.17",
     "@types/jasmine": "~5.1.0",
     "@types/node": "^18.18.0",
+    "@types/xml2js": "^0.4.14",
     "jasmine-core": "~5.6.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",

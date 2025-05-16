@@ -79,6 +79,5 @@ export class HamburgerComponent {
 
     // Apply back to the Angular wrapper and rebind
     this.ddBtn.items = this.menuItems;
-    this.ddBtn.dataBind();
   }
 }
