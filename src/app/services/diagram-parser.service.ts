@@ -404,411 +404,411 @@ export class DiagramParserService {
     }
   }
 
-  /**
-   * Parse an XML string into the same diagram structure.
-   */
-  public processXml(xmlString: string): DiagramData {
-    const wrapped = `<__root__>${xmlString}</__root__>`;
-    const xmlDoc = new DOMParser().parseFromString(wrapped, 'application/xml');
-    if (xmlDoc.getElementsByTagName('parsererror').length) {
-      console.error('XML parse error');
-      return { nodes: [], connectors: [] };
-    }
+  // /**
+  //  * Parse an XML string into the same diagram structure.
+  //  */
+  // public processXml(xmlString: string): DiagramData {
+  //   const wrapped = `<__root__>${xmlString}</__root__>`;
+  //   const xmlDoc = new DOMParser().parseFromString(wrapped, 'application/xml');
+  //   if (xmlDoc.getElementsByTagName('parsererror').length) {
+  //     console.error('XML parse error');
+  //     return { nodes: [], connectors: [] };
+  //   }
 
-    const allEls = Array.from(xmlDoc.documentElement.children);
-    const nodes: DiagramNode[] = [];
-    const connectors: DiagramConnector[] = [];
+  //   const allEls = Array.from(xmlDoc.documentElement.children);
+  //   const nodes: DiagramNode[] = [];
+  //   const connectors: DiagramConnector[] = [];
 
-    // Group top-level
-    const topGroups = this.xmlGroupByTag(allEls);
-    const primitives: Element[] = [];
-    const complexes: Element[] = [];
-    const arrays: { tag: string; items: Element[] }[] = [];
+  //   // Group top-level
+  //   const topGroups = this.xmlGroupByTag(allEls);
+  //   const primitives: Element[] = [];
+  //   const complexes: Element[] = [];
+  //   const arrays: { tag: string; items: Element[] }[] = [];
 
-    Object.entries(topGroups).forEach(([tag, items]) => {
-      if (items.length > 1)               arrays.push({ tag, items });
-      else if (items[0].children.length === 0) primitives.push(items[0]);
-      else                                 complexes.push(items[0]);
-    });
+  //   Object.entries(topGroups).forEach(([tag, items]) => {
+  //     if (items.length > 1)               arrays.push({ tag, items });
+  //     else if (items[0].children.length === 0) primitives.push(items[0]);
+  //     else                                 complexes.push(items[0]);
+  //   });
 
-    // Merge simple top-level primitives
-    let mergedRootId: string | null = null;
-    if (primitives.length) {
-      mergedRootId = 'RootMerged';
-      const ann: Annotation[] = [];
-      const content: string[] = [];
-      primitives.forEach(el => {
-        const k = el.tagName;
-        const v = el.textContent!.trim();
-        ann.push({ id: `Key_${k}`, content: `${k}:` });
-        ann.push({ id: `Value_${k}`, content: this.xmlFmt(v) });
-        content.push(`${k}: ${this.xmlFmt(v)}`);
-      });
-      nodes.push({
-        id: mergedRootId,
-        width: this.DEFAULT_NODE_WIDTH,
-        height: this.DEFAULT_NODE_HEIGHT,
-        annotations: ann,
-        additionalInfo: { isLeaf: true },
-        data: {
-          path: 'Root',
-          title: content.join('\n'),
-          actualdata: content.join('\n')
-        }
-      });
-    }
+  //   // Merge simple top-level primitives
+  //   let mergedRootId: string | null = null;
+  //   if (primitives.length) {
+  //     mergedRootId = 'RootMerged';
+  //     const ann: Annotation[] = [];
+  //     const content: string[] = [];
+  //     primitives.forEach(el => {
+  //       const k = el.tagName;
+  //       const v = el.textContent!.trim();
+  //       ann.push({ id: `Key_${k}`, content: `${k}:` });
+  //       ann.push({ id: `Value_${k}`, content: this.xmlFmt(v) });
+  //       content.push(`${k}: ${this.xmlFmt(v)}`);
+  //     });
+  //     nodes.push({
+  //       id: mergedRootId,
+  //       width: this.DEFAULT_NODE_WIDTH,
+  //       height: this.DEFAULT_NODE_HEIGHT,
+  //       annotations: ann,
+  //       additionalInfo: { isLeaf: true },
+  //       data: {
+  //         path: 'Root',
+  //         title: content.join('\n'),
+  //         actualdata: content.join('\n')
+  //       }
+  //     });
+  //   }
 
-    // Recurse into single nested
-    complexes.forEach((el, i) => {
-      const id = this.xmlPascal(el.tagName) + i;
-      const { nodes: nn, connectors: cc } = this.xmlProc(
-        el, id, mergedRootId, el.tagName, `Root.${el.tagName}`
-      );
-      nodes.push(...nn);
-      connectors.push(...cc);
-    });
+  //   // Recurse into single nested
+  //   complexes.forEach((el, i) => {
+  //     const id = this.xmlPascal(el.tagName) + i;
+  //     const { nodes: nn, connectors: cc } = this.xmlProc(
+  //       el, id, mergedRootId, el.tagName, `Root.${el.tagName}`
+  //     );
+  //     nodes.push(...nn);
+  //     connectors.push(...cc);
+  //   });
 
-    // Handle arrays
-    arrays.forEach(a => {
-      this.xmlEmitArrayBlock(a.tag, a.items, mergedRootId, 'Root', nodes, connectors);
-    });
+  //   // Handle arrays
+  //   arrays.forEach(a => {
+  //     this.xmlEmitArrayBlock(a.tag, a.items, mergedRootId, 'Root', nodes, connectors);
+  //   });
 
-    // Inject dummy main-root if needed
-    const allIds      = nodes.map(n => n.id);
-    const hasIncoming = new Set(connectors.map(c => c.targetID));
-    const roots       = allIds.filter(id => !hasIncoming.has(id));
-    if (roots.length > 1) {
-      const mr = 'main-root';
-      nodes.push({
-        id: mr,
-        width: 40,
-        height: 40,
-        annotations: [{ content: '' }],
-        additionalInfo: { isLeaf: false },
-        data: { path: 'MainRoot', title: '', actualdata: '' }
-      });
-      roots.forEach(r => connectors.push({
-        id: `connector-${mr}-${r}`,
-        sourceID: mr,
-        targetID: r
-      }));
-    }
+  //   // Inject dummy main-root if needed
+  //   const allIds      = nodes.map(n => n.id);
+  //   const hasIncoming = new Set(connectors.map(c => c.targetID));
+  //   const roots       = allIds.filter(id => !hasIncoming.has(id));
+  //   if (roots.length > 1) {
+  //     const mr = 'main-root';
+  //     nodes.push({
+  //       id: mr,
+  //       width: 40,
+  //       height: 40,
+  //       annotations: [{ content: '' }],
+  //       additionalInfo: { isLeaf: false },
+  //       data: { path: 'MainRoot', title: '', actualdata: '' }
+  //     });
+  //     roots.forEach(r => connectors.push({
+  //       id: `connector-${mr}-${r}`,
+  //       sourceID: mr,
+  //       targetID: r
+  //     }));
+  //   }
 
-    return { nodes, connectors };
-  }
+  //   return { nodes, connectors };
+  // }
 
-  /** Group elements by tagName */
-  private xmlGroupByTag(elems: Element[]): Record<string, Element[]> {
-    return elems.reduce((acc, el) => {
-      (acc[el.tagName] ||= []).push(el);
-      return acc;
-    }, {} as Record<string, Element[]>);
-  }
+  // /** Group elements by tagName */
+  // private xmlGroupByTag(elems: Element[]): Record<string, Element[]> {
+  //   return elems.reduce((acc, el) => {
+  //     (acc[el.tagName] ||= []).push(el);
+  //     return acc;
+  //   }, {} as Record<string, Element[]>);
+  // }
 
-  /** Pascal‐case an XML tag */
-  private xmlPascal(s: string): string {
-    return s.replace(/(^\w|[-_]\w)/g, m => m.replace(/[-_]/, '').toUpperCase());
-  }
+  // /** Pascal‐case an XML tag */
+  // private xmlPascal(s: string): string {
+  //   return s.replace(/(^\w|[-_]\w)/g, m => m.replace(/[-_]/, '').toUpperCase());
+  // }
 
-  /** Format a text node value */
-  private xmlFmt(v: string): string {
-    if (/^(true|false)$/i.test(v)) return v.toLowerCase();
-    if (!isNaN(Number(v))) return v;
-    return `"${v}"`;
-  }
+  // /** Format a text node value */
+  // private xmlFmt(v: string): string {
+  //   if (/^(true|false)$/i.test(v)) return v.toLowerCase();
+  //   if (!isNaN(Number(v))) return v;
+  //   return `"${v}"`;
+  // }
 
-  /**
-   * Recursive XML processor.
-   */
-  private xmlProc(
-    el: Element,
-    nodeId: string,
-    parentId: string | null,
-    keyName: string,
-    path: string
-  ): { nodes: DiagramNode[]; connectors: DiagramConnector[] } {
-    const nodes: DiagramNode[] = [];
-    const connectors: DiagramConnector[] = [];
-    const kids = Array.from(el.children);
+  // /**
+  //  * Recursive XML processor.
+  //  */
+  // private xmlProc(
+  //   el: Element,
+  //   nodeId: string,
+  //   parentId: string | null,
+  //   keyName: string,
+  //   path: string
+  // ): { nodes: DiagramNode[]; connectors: DiagramConnector[] } {
+  //   const nodes: DiagramNode[] = [];
+  //   const connectors: DiagramConnector[] = [];
+  //   const kids = Array.from(el.children);
 
-    // a) Pure leaf
-    if (!kids.length) {
-      const t = el.textContent!.trim();
-      nodes.push({
-        id: nodeId,
-        width: this.DEFAULT_NODE_WIDTH,
-        height: this.DEFAULT_NODE_HEIGHT,
-        annotations: [{ content: `${keyName}: ${this.xmlFmt(t)}` }],
-        additionalInfo: { isLeaf: true },
-        data: { path, title: `${keyName}: ${this.xmlFmt(t)}`, actualdata: `${keyName}: ${this.xmlFmt(t)}` }
-      });
-      if (parentId) {
-        connectors.push({ id: `connector-${parentId}-${nodeId}`, sourceID: parentId, targetID: nodeId });
-      }
-      return { nodes, connectors };
-    }
+  //   // a) Pure leaf
+  //   if (!kids.length) {
+  //     const t = el.textContent!.trim();
+  //     nodes.push({
+  //       id: nodeId,
+  //       width: this.DEFAULT_NODE_WIDTH,
+  //       height: this.DEFAULT_NODE_HEIGHT,
+  //       annotations: [{ content: `${keyName}: ${this.xmlFmt(t)}` }],
+  //       additionalInfo: { isLeaf: true },
+  //       data: { path, title: `${keyName}: ${this.xmlFmt(t)}`, actualdata: `${keyName}: ${this.xmlFmt(t)}` }
+  //     });
+  //     if (parentId) {
+  //       connectors.push({ id: `connector-${parentId}-${nodeId}`, sourceID: parentId, targetID: nodeId });
+  //     }
+  //     return { nodes, connectors };
+  //   }
 
-    // b) Group children
-    const groups  = this.xmlGroupByTag(kids);
-    const leafEls = [] as Element[];
-    const complexEls = [] as Element[];
-    const arrayEls   = [] as { tag: string; items: Element[] }[];
+  //   // b) Group children
+  //   const groups  = this.xmlGroupByTag(kids);
+  //   const leafEls = [] as Element[];
+  //   const complexEls = [] as Element[];
+  //   const arrayEls   = [] as { tag: string; items: Element[] }[];
 
-    Object.entries(groups).forEach(([tag, items]) => {
-      if (items.length > 1)                    arrayEls.push({ tag, items });
-      else if (items[0].children.length === 0) leafEls.push(items[0]);
-      else                                     complexEls.push(items[0]);
-    });
+  //   Object.entries(groups).forEach(([tag, items]) => {
+  //     if (items.length > 1)                    arrayEls.push({ tag, items });
+  //     else if (items[0].children.length === 0) leafEls.push(items[0]);
+  //     else                                     complexEls.push(items[0]);
+  //   });
 
-    // c) Child count
-    const displayCount = complexEls.length + arrayEls.length + (leafEls.length ? 1 : 0);
+  //   // c) Child count
+  //   const displayCount = complexEls.length + arrayEls.length + (leafEls.length ? 1 : 0);
 
-    // d) Folder node
-    const ann = [{ content: keyName }];
-    if (displayCount) ann.push({ content: `{${displayCount}}` });
-    nodes.push({
-      id: nodeId,
-      width: this.DEFAULT_NODE_WIDTH,
-      height: this.DEFAULT_NODE_HEIGHT,
-      annotations: ann,
-      additionalInfo: { isLeaf: false },
-      data: { path, title: keyName, actualdata: keyName }
-    });
-    if (parentId) {
-      connectors.push({ id: `connector-${parentId}-${nodeId}`, sourceID: parentId, targetID: nodeId });
-    }
+  //   // d) Folder node
+  //   const ann = [{ content: keyName }];
+  //   if (displayCount) ann.push({ content: `{${displayCount}}` });
+  //   nodes.push({
+  //     id: nodeId,
+  //     width: this.DEFAULT_NODE_WIDTH,
+  //     height: this.DEFAULT_NODE_HEIGHT,
+  //     annotations: ann,
+  //     additionalInfo: { isLeaf: false },
+  //     data: { path, title: keyName, actualdata: keyName }
+  //   });
+  //   if (parentId) {
+  //     connectors.push({ id: `connector-${parentId}-${nodeId}`, sourceID: parentId, targetID: nodeId });
+  //   }
 
-    // e) Merge primitive children
-    if (leafEls.length) {
-      const leafId = `${nodeId}-leaf`;
-      const la: Annotation[] = [];
-      const lc: string[] = [];
-      leafEls.forEach(ch => {
-        const k = ch.tagName, v = ch.textContent!.trim();
-        la.push({ id: `Key_${k}`, content: `${k}:` });
-        la.push({ id: `Value_${k}`, content: this.xmlFmt(v) });
-        lc.push(`${k}: ${this.xmlFmt(v)}`);
-      });
-      nodes.push({
-        id: leafId,
-        width: this.DEFAULT_NODE_WIDTH,
-        height: this.DEFAULT_NODE_HEIGHT,
-        annotations: la,
-        additionalInfo: { isLeaf: true },
-        data: { path: `${path}.leaf`, title: lc.join('\n'), actualdata: lc.join('\n') }
-      });
-      connectors.push({ id: `connector-${nodeId}-${leafId}`, sourceID: nodeId, targetID: leafId });
-    }
+  //   // e) Merge primitive children
+  //   if (leafEls.length) {
+  //     const leafId = `${nodeId}-leaf`;
+  //     const la: Annotation[] = [];
+  //     const lc: string[] = [];
+  //     leafEls.forEach(ch => {
+  //       const k = ch.tagName, v = ch.textContent!.trim();
+  //       la.push({ id: `Key_${k}`, content: `${k}:` });
+  //       la.push({ id: `Value_${k}`, content: this.xmlFmt(v) });
+  //       lc.push(`${k}: ${this.xmlFmt(v)}`);
+  //     });
+  //     nodes.push({
+  //       id: leafId,
+  //       width: this.DEFAULT_NODE_WIDTH,
+  //       height: this.DEFAULT_NODE_HEIGHT,
+  //       annotations: la,
+  //       additionalInfo: { isLeaf: true },
+  //       data: { path: `${path}.leaf`, title: lc.join('\n'), actualdata: lc.join('\n') }
+  //     });
+  //     connectors.push({ id: `connector-${nodeId}-${leafId}`, sourceID: nodeId, targetID: leafId });
+  //   }
 
-    // f) Arrays
-    arrayEls.forEach(a => this.xmlEmitArrayBlock(a.tag, a.items, nodeId, path, nodes, connectors));
+  //   // f) Arrays
+  //   arrayEls.forEach(a => this.xmlEmitArrayBlock(a.tag, a.items, nodeId, path, nodes, connectors));
 
-    // g) Complex recurse
-    complexEls.forEach((ch, i) => {
-      const cid = `${nodeId}-${this.xmlPascal(ch.tagName)}${i}`;
-      const { nodes: nn, connectors: cc } = this.xmlProc(
-        ch, cid, nodeId, ch.tagName, `${path}.${ch.tagName}`
-      );
-      nodes.push(...nn);
-      connectors.push(...cc);
-    });
+  //   // g) Complex recurse
+  //   complexEls.forEach((ch, i) => {
+  //     const cid = `${nodeId}-${this.xmlPascal(ch.tagName)}${i}`;
+  //     const { nodes: nn, connectors: cc } = this.xmlProc(
+  //       ch, cid, nodeId, ch.tagName, `${path}.${ch.tagName}`
+  //     );
+  //     nodes.push(...nn);
+  //     connectors.push(...cc);
+  //   });
 
-    return { nodes, connectors };
-  }
+  //   return { nodes, connectors };
+  // }
 
-  /**
-   * Emit array block for XML.
-   */
-  private xmlEmitArrayBlock(
-    tag: string,
-    items: Element[],
-    parentId: string | null,
-    parentPath: string,
-    nodes: DiagramNode[],
-    connectors: DiagramConnector[]
-  ): void {
-    // 1) Folder for entire array
-    const parentNodeId = parentId
-      ? `${parentId}-${this.xmlPascal(tag)}`
-      : this.xmlPascal(tag);
-    nodes.push({
-      id: parentNodeId,
-      width: this.DEFAULT_NODE_WIDTH,
-      height: this.DEFAULT_NODE_HEIGHT,
-      annotations: [
-        { content: tag },
-        { content: `{${items.length}}` }
-      ],
-      additionalInfo: { isLeaf: false },
-      data: {
-        path: `${parentPath}.${tag}`,
-        title: tag,
-        actualdata: tag
-      }
-    });
-    if (parentId) {
-      connectors.push({
-        id: `connector-${parentId}-${parentNodeId}`,
-        sourceID: parentId,
-        targetID: parentNodeId
-      });
-    }
+  // /**
+  //  * Emit array block for XML.
+  //  */
+  // private xmlEmitArrayBlock(
+  //   tag: string,
+  //   items: Element[],
+  //   parentId: string | null,
+  //   parentPath: string,
+  //   nodes: DiagramNode[],
+  //   connectors: DiagramConnector[]
+  // ): void {
+  //   // 1) Folder for entire array
+  //   const parentNodeId = parentId
+  //     ? `${parentId}-${this.xmlPascal(tag)}`
+  //     : this.xmlPascal(tag);
+  //   nodes.push({
+  //     id: parentNodeId,
+  //     width: this.DEFAULT_NODE_WIDTH,
+  //     height: this.DEFAULT_NODE_HEIGHT,
+  //     annotations: [
+  //       { content: tag },
+  //       { content: `{${items.length}}` }
+  //     ],
+  //     additionalInfo: { isLeaf: false },
+  //     data: {
+  //       path: `${parentPath}.${tag}`,
+  //       title: tag,
+  //       actualdata: tag
+  //     }
+  //   });
+  //   if (parentId) {
+  //     connectors.push({
+  //       id: `connector-${parentId}-${parentNodeId}`,
+  //       sourceID: parentId,
+  //       targetID: parentNodeId
+  //     });
+  //   }
   
-    // 2) Primitive‑only array?
-    if (items.every(it => it.children.length === 0)) {
-      items.forEach((it, idx) => {
-        const leafId = `${parentNodeId}-${idx}`;
-        const txt    = it.textContent!.trim();
-        const f      = this.xmlFmt(txt);
-        nodes.push({
-          id: leafId,
-          width: this.DEFAULT_NODE_WIDTH,
-          height: this.DEFAULT_NODE_HEIGHT,
-          annotations: [{ content: f }],
-          additionalInfo: { isLeaf: true },
-          data: {
-            path: `${parentPath}.${tag}[${idx}]`,
-            title: f,
-            actualdata: f
-          }
-        });
-        connectors.push({
-          id: `connector-${parentNodeId}-${leafId}`,
-          sourceID: parentNodeId,
-          targetID: leafId
-        });
-      });
-      return;
-    }
+  //   // 2) Primitive‑only array?
+  //   if (items.every(it => it.children.length === 0)) {
+  //     items.forEach((it, idx) => {
+  //       const leafId = `${parentNodeId}-${idx}`;
+  //       const txt    = it.textContent!.trim();
+  //       const f      = this.xmlFmt(txt);
+  //       nodes.push({
+  //         id: leafId,
+  //         width: this.DEFAULT_NODE_WIDTH,
+  //         height: this.DEFAULT_NODE_HEIGHT,
+  //         annotations: [{ content: f }],
+  //         additionalInfo: { isLeaf: true },
+  //         data: {
+  //           path: `${parentPath}.${tag}[${idx}]`,
+  //           title: f,
+  //           actualdata: f
+  //         }
+  //       });
+  //       connectors.push({
+  //         id: `connector-${parentNodeId}-${leafId}`,
+  //         sourceID: parentNodeId,
+  //         targetID: leafId
+  //       });
+  //     });
+  //     return;
+  //   }
   
-    // 3) “Object‑array” (all items are flat objects) ?
-    const isObjectArray = items.every(it => {
-      const ch = Array.from(it.children);
-      return Object.values(this.xmlGroupByTag(ch))
-        .every(arr => arr.length === 1 && arr[0].children.length === 0);
-    });
-    if (isObjectArray) {
-      items.forEach((it, idx) => {
-        const leafId = `${parentNodeId}-${idx}`;
-        const ann: Annotation[] = [];
-        const lc: string[]      = [];
-        // merge each primitive field
-        Array.from(it.children).forEach(ch => {
-          const k = ch.tagName, v = ch.textContent!.trim();
-          ann.push({ id: `Key_${k}`,   content: `${k}:` });
-          ann.push({ id: `Value_${k}`, content: this.xmlFmt(v) });
-          lc.push(`${k}: ${this.xmlFmt(v)}`);
-        });
-        nodes.push({
-          id: leafId,
-          width: this.DEFAULT_NODE_WIDTH,
-          height: this.DEFAULT_NODE_HEIGHT,
-          annotations: ann,
-          additionalInfo: { isLeaf: true },
-          data: {
-            path: `${parentPath}.${tag}[${idx}]`,
-            title: lc.join("\n"),
-            actualdata: lc.join("\n")
-          }
-        });
-        connectors.push({
-          id: `connector-${parentNodeId}-${leafId}`,
-          sourceID: parentNodeId,
-          targetID: leafId
-        });
-      });
-      return;
-    }
+  //   // 3) “Object‑array” (all items are flat objects) ?
+  //   const isObjectArray = items.every(it => {
+  //     const ch = Array.from(it.children);
+  //     return Object.values(this.xmlGroupByTag(ch))
+  //       .every(arr => arr.length === 1 && arr[0].children.length === 0);
+  //   });
+  //   if (isObjectArray) {
+  //     items.forEach((it, idx) => {
+  //       const leafId = `${parentNodeId}-${idx}`;
+  //       const ann: Annotation[] = [];
+  //       const lc: string[]      = [];
+  //       // merge each primitive field
+  //       Array.from(it.children).forEach(ch => {
+  //         const k = ch.tagName, v = ch.textContent!.trim();
+  //         ann.push({ id: `Key_${k}`,   content: `${k}:` });
+  //         ann.push({ id: `Value_${k}`, content: this.xmlFmt(v) });
+  //         lc.push(`${k}: ${this.xmlFmt(v)}`);
+  //       });
+  //       nodes.push({
+  //         id: leafId,
+  //         width: this.DEFAULT_NODE_WIDTH,
+  //         height: this.DEFAULT_NODE_HEIGHT,
+  //         annotations: ann,
+  //         additionalInfo: { isLeaf: true },
+  //         data: {
+  //           path: `${parentPath}.${tag}[${idx}]`,
+  //           title: lc.join("\n"),
+  //           actualdata: lc.join("\n")
+  //         }
+  //       });
+  //       connectors.push({
+  //         id: `connector-${parentNodeId}-${leafId}`,
+  //         sourceID: parentNodeId,
+  //         targetID: leafId
+  //       });
+  //     });
+  //     return;
+  //   }
   
-    // 4) “Mixed” case: each item has some primitives AND some nested children
-    const mixed = items.every(it => {
-      const kids = Array.from(it.children);
-      const grp  = this.xmlGroupByTag(kids);
-      const hasPrim    = Object.entries(grp).some(([,arr]) =>
-        arr.length === 1 && arr[0].children.length === 0
-      );
-      const hasComplex = Object.entries(grp).some(([,arr]) =>
-        arr.length > 1 || arr[0].children.length > 0
-      );
-      return hasPrim && hasComplex;
-    });
-    if (mixed) {
-      items.forEach((it, idx) => {
-        const kids = Array.from(it.children);
-        const grp  = this.xmlGroupByTag(kids);
+  //   // 4) “Mixed” case: each item has some primitives AND some nested children
+  //   const mixed = items.every(it => {
+  //     const kids = Array.from(it.children);
+  //     const grp  = this.xmlGroupByTag(kids);
+  //     const hasPrim    = Object.entries(grp).some(([,arr]) =>
+  //       arr.length === 1 && arr[0].children.length === 0
+  //     );
+  //     const hasComplex = Object.entries(grp).some(([,arr]) =>
+  //       arr.length > 1 || arr[0].children.length > 0
+  //     );
+  //     return hasPrim && hasComplex;
+  //   });
+  //   if (mixed) {
+  //     items.forEach((it, idx) => {
+  //       const kids = Array.from(it.children);
+  //       const grp  = this.xmlGroupByTag(kids);
   
-        // a) merge the primitives into a single leaf under this array item
-        const primKeys = Object.entries(grp)
-          .filter(([,arr]) => arr.length === 1 && arr[0].children.length === 0)
-          .map(([k]) => k);
-        const leafId = `${parentNodeId}-${idx}`;
-        const la: Annotation[] = [];
-        const lc: string[]     = [];
-        primKeys.forEach(k => {
-          const v = grp[k][0].textContent!.trim();
-          la.push({ id: `Key_${k}`,   content: `${k}:` });
-          la.push({ id: `Value_${k}`, content: this.xmlFmt(v) });
-          lc.push(`${k}: ${this.xmlFmt(v)}`);
-        });
-        nodes.push({
-          id: leafId,
-          width: this.DEFAULT_NODE_WIDTH,
-          height: this.DEFAULT_NODE_HEIGHT,
-          annotations: la,
-          additionalInfo: { isLeaf: true },
-          data: {
-            path: `${parentPath}.${tag}[${idx}]`,
-            title: lc.join("\n"),
-            actualdata: lc.join("\n")
-          }
-        });
-        connectors.push({
-          id: `connector-${parentNodeId}-${leafId}`,
-          sourceID: parentNodeId,
-          targetID: leafId
-        });
+  //       // a) merge the primitives into a single leaf under this array item
+  //       const primKeys = Object.entries(grp)
+  //         .filter(([,arr]) => arr.length === 1 && arr[0].children.length === 0)
+  //         .map(([k]) => k);
+  //       const leafId = `${parentNodeId}-${idx}`;
+  //       const la: Annotation[] = [];
+  //       const lc: string[]     = [];
+  //       primKeys.forEach(k => {
+  //         const v = grp[k][0].textContent!.trim();
+  //         la.push({ id: `Key_${k}`,   content: `${k}:` });
+  //         la.push({ id: `Value_${k}`, content: this.xmlFmt(v) });
+  //         lc.push(`${k}: ${this.xmlFmt(v)}`);
+  //       });
+  //       nodes.push({
+  //         id: leafId,
+  //         width: this.DEFAULT_NODE_WIDTH,
+  //         height: this.DEFAULT_NODE_HEIGHT,
+  //         annotations: la,
+  //         additionalInfo: { isLeaf: true },
+  //         data: {
+  //           path: `${parentPath}.${tag}[${idx}]`,
+  //           title: lc.join("\n"),
+  //           actualdata: lc.join("\n")
+  //         }
+  //       });
+  //       connectors.push({
+  //         id: `connector-${parentNodeId}-${leafId}`,
+  //         sourceID: parentNodeId,
+  //         targetID: leafId
+  //       });
   
-        // b) then recurse into the complex/nested children under that leaf
-        Object.entries(grp)
-          .filter(([,arr]) => arr.length > 1 || arr[0].children.length > 0)
-          .forEach(([childKey, arr]) => {
-            // if an array of primitives, re‑emit as a sub‑array
-            if (arr.length > 1 && arr[0].children.length === 0) {
-              this.xmlEmitArrayBlock(childKey, arr, leafId,
-                `${parentPath}.${tag}[${idx}]`, nodes, connectors
-              );
-            }
-            // array of complex or single complex branch
-            else if (arr.length > 1) {
-              this.xmlEmitArrayBlock(childKey, arr, leafId,
-                `${parentPath}.${tag}[${idx}]`, nodes, connectors
-              );
-            } else {
-              // single nested element → full recursion
-              const nestedEl = arr[0];
-              const childId  = `${leafId}-${this.xmlPascal(childKey)}`;
-              const { nodes: nn, connectors: cc } = this.xmlProc(
-                nestedEl, childId, leafId, childKey,
-                `${parentPath}.${tag}[${idx}].${childKey}`
-              );
-              nodes.push(...nn);
-              connectors.push(...cc);
-            }
-          });
-      });
-      return;
-    }
+  //       // b) then recurse into the complex/nested children under that leaf
+  //       Object.entries(grp)
+  //         .filter(([,arr]) => arr.length > 1 || arr[0].children.length > 0)
+  //         .forEach(([childKey, arr]) => {
+  //           // if an array of primitives, re‑emit as a sub‑array
+  //           if (arr.length > 1 && arr[0].children.length === 0) {
+  //             this.xmlEmitArrayBlock(childKey, arr, leafId,
+  //               `${parentPath}.${tag}[${idx}]`, nodes, connectors
+  //             );
+  //           }
+  //           // array of complex or single complex branch
+  //           else if (arr.length > 1) {
+  //             this.xmlEmitArrayBlock(childKey, arr, leafId,
+  //               `${parentPath}.${tag}[${idx}]`, nodes, connectors
+  //             );
+  //           } else {
+  //             // single nested element → full recursion
+  //             const nestedEl = arr[0];
+  //             const childId  = `${leafId}-${this.xmlPascal(childKey)}`;
+  //             const { nodes: nn, connectors: cc } = this.xmlProc(
+  //               nestedEl, childId, leafId, childKey,
+  //               `${parentPath}.${tag}[${idx}].${childKey}`
+  //             );
+  //             nodes.push(...nn);
+  //             connectors.push(...cc);
+  //           }
+  //         });
+  //     });
+  //     return;
+  //   }
   
-    // 5) Fallback full recursion (if none of the above matched)
-    items.forEach((it, idx) => {
-      const itemId   = `${parentNodeId}-${idx}`;
-      const itemPath = `${parentPath}.${tag}[${idx}]`;
-      const { nodes: nn, connectors: cc } = this.xmlProc(
-        it, itemId, parentNodeId, tag, itemPath
-      );
-      nodes.push(...nn);
-      connectors.push(...cc);
-    });
-  }
+  //   // 5) Fallback full recursion (if none of the above matched)
+  //   items.forEach((it, idx) => {
+  //     const itemId   = `${parentNodeId}-${idx}`;
+  //     const itemPath = `${parentPath}.${tag}[${idx}]`;
+  //     const { nodes: nn, connectors: cc } = this.xmlProc(
+  //       it, itemId, parentNodeId, tag, itemPath
+  //     );
+  //     nodes.push(...nn);
+  //     connectors.push(...cc);
+  //   });
+  // }
   
 }
