@@ -83,9 +83,7 @@ export class DiagramParserService {
       const leafAnnotations: Annotation[] = primitiveKeys.flatMap(key => {
         const raw = data[key] == null ? '' : String(data[key]);
         const anns: Annotation[] = [{ id: `Key_${key}`, content: `${key}:` }];
-        if (raw !== '') {
-          anns.push({ id: `Value_${key}`, content: raw });
-        }
+        anns.push({ id: `Value_${key}`, content: raw });
         return anns;
       });
 
@@ -182,9 +180,7 @@ export class DiagramParserService {
               const [k, ...rest] = field.split(':');
               const val = rest.join(':').trim();
               const anns: Annotation[] = [{ id: `Key_${baseId}_${k}`, content: `${k}:` }];
-              if (val) {
-                anns.push({ id: `Value_${baseId}_${k}`, content: val });
-              }
+              anns.push({ id: `Value_${baseId}_${k}`, content: val });
               return anns;
             });
             const mergedContent = primitiveFields.join('\n');
@@ -283,7 +279,7 @@ export class DiagramParserService {
       const leafAnnotations = primKeys.flatMap(key => {
         const raw = String((element as any)[key]);
         const anns: Annotation[] = [{ id: `Key_${leafId}_${key}`, content: `${key}:` }];
-        if (raw) anns.push({ id: `Value_${leafId}_${key}`, content: raw });
+        anns.push({ id: `Value_${leafId}_${key}`, content: raw });
         return anns;
       });
       const mergedContent = primKeys

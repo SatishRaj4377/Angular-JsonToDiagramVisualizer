@@ -318,7 +318,7 @@ export class DiagramComponent implements OnInit {
   // sets the default values for the connectors in the diagram
   getConnectorDefaults(connector: ConnectorModel): ConnectorModel {
     connector.constraints =
-      ConnectorConstraints.Default | ConnectorConstraints.ReadOnly;
+      ConnectorConstraints.Default & ConnectorConstraints.Select;
     connector.type = 'Orthogonal';
     connector.style = { strokeColor:this.currentThemeSettings.connectorStrokeColor, strokeWidth:2 };
     connector.cornerRadius = 15;
@@ -329,8 +329,6 @@ export class DiagramComponent implements OnInit {
   // refreshes the diagram layout and fits it to the page
   refreshLayout() {
     this.diagram.refresh();
-    this.diagram.dataBind();
-    this.diagram.doLayout();
     this.diagram.fitToPage({
       region: 'Content', canZoomIn: true
     });
