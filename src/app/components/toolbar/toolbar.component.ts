@@ -158,6 +158,7 @@ export class ToolbarComponent implements AfterViewInit {
     if (this.textbox) {
       this.textbox.value = '';
     }
+    this.shouldShowCounter = false;
     this.total = 0;
     this.current = 0;
   }
