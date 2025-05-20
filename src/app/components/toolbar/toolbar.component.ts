@@ -4,7 +4,8 @@ import {
   EventEmitter,
   ViewEncapsulation,
   ViewChild,
-  Input
+  Input,
+  AfterViewInit
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -28,11 +29,6 @@ import {
         [items]="toolbarItems"
         (clicked)="onToolClicked($event)">
       </ejs-toolbar>
-
-      <span class="hit-counter" *ngIf="total > 0">
-        {{ current }} / {{ total }}
-      </span>
-
       <ejs-textbox
         #textbox
         cssClass="toolbar-search"
@@ -43,17 +39,12 @@ import {
   `,
   styles: [`
     .diagram-toolbar { display: flex; align-items: center; }
-    .hit-counter {
-      margin: 0 8px;
-      font-family: Consolas;
-      font-size: 12px;
-    }
     ejs-toolbar { 
       margin-right: 12px; border:0;
     }
 
     .toolbar-search {
-      width: 180px; 
+      width: 12rem !important; 
     }
 
     .e-toolbar{
@@ -70,15 +61,34 @@ import {
       margin: 0;
       padding: 0;
     }
+    .e-input-group-icon.counter-icon {
+      font-size: .75rem !important;
+      padding: 0 8px;
+      color: #888;
+    }
+    .counter-icon.hidden {
+      display: none;
+    }
   `]
 })
-export class ToolbarComponent {
+export class ToolbarComponent implements AfterViewInit {
   @Output() toolClick   = new EventEmitter<'reset'|'fitToPage'|'zoomIn'|'zoomOut'>();
   @Output() searchNode  = new EventEmitter<string>();
   @Output() nextMatch    = new EventEmitter<void>();
 
-  @Input() total = 0;     // total hits
-  @Input() current = 0;   // current focused hit (1-based)
+  private _current = 0;
+  @Input()
+  set current(val: number) {
+    this._current = val;
+    this.updateCounter();
+  }
+  
+  private _total = 0;
+  @Input()
+  set total(val: number) {
+    this._total = val;
+    this.updateCounter();
+  }
 
   @ViewChild('textbox', { static: false }) textbox!: TextBoxComponent;
 
@@ -88,6 +98,28 @@ export class ToolbarComponent {
     { prefixIcon: 'e-icons e-zoom-in',     tooltipText: 'Zoom In',    id: 'zoomIn',    cssClass: 'e-flat' },
     { prefixIcon: 'e-icons e-zoom-out',    tooltipText: 'Zoom Out',   id: 'zoomOut',   cssClass: 'e-flat' }
   ];
+
+
+  ngAfterViewInit() {
+    // Add search icon to the left
+    this.textbox.addIcon('prepend', 'e-icons e-search');
+
+    // Add counter to the right
+    this.textbox.addIcon('append', 'counter-icon');
+
+    // Set initial counter value
+    this.updateCounter();
+  }
+
+  // Method to update the counter
+  private updateCounter() {
+    const counterEl = document.querySelector('.counter-icon');
+    if (counterEl) {
+      const shouldShow = this._total > 0;
+      counterEl.textContent = shouldShow ? `${this._current} / ${this._total}` : '';
+      counterEl.classList.toggle('hidden', !shouldShow);
+    }
+  }
 
   // emits the event based on the toolbar item clicked
   onToolClicked(ev: ClickEventArgs) {
@@ -116,5 +148,7 @@ export class ToolbarComponent {
     if (this.textbox) {
       this.textbox.value = '';
     }
+    this.total = 0;
+    this.current = 0;
   }
 }
