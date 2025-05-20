@@ -47,7 +47,9 @@ import {
       width: 11rem !important; 
       padding-left: 4px !important;
     }
-
+    .toolbar-search .e-input{
+      padding:0px !important;
+    }
     .e-toolbar{
      border: 0;
     }
@@ -69,9 +71,6 @@ import {
     }
     .counter-icon.hidden {
       display: none;
-    }
-    .toolbar-search .e-input-group input.e-input, .e-input-group.e-control-wrapper input.e-input{
-      padding:0px !important;
     }
   `]
 })

@@ -2,7 +2,8 @@ import {
   Component,
   ViewChild,
   EventEmitter,
-  Output
+  Output,
+  ViewEncapsulation
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DialogModule, DialogComponent } from '@syncfusion/ej2-angular-popups';
@@ -18,7 +19,7 @@ import { FormsModule } from '@angular/forms';
     <div id="export-dialog">
       <ejs-dialog
         #dialog
-        header="Download Image"
+        header="Export Options"
         [visible]="visible"
         width="300px"
         [showCloseIcon]="true"
@@ -29,12 +30,13 @@ import { FormsModule } from '@angular/forms';
           <div>
             <label>File Name</label>
             <ejs-textbox
+              #textbox id="textbox"
               [(ngModel)]="fileName"
               placeholder="Enter file name" />
           </div>
           <div style="margin-top:8px;">
-            <label>Select Export Mode:</label>
-            <div>
+            <label>Format</label>
+            <div class="radio-buttons">
               <ejs-radiobutton
                 name="format"
                 label="PNG"
@@ -57,7 +59,6 @@ import { FormsModule } from '@angular/forms';
             </div>
           </div>
           <div class="buttons">
-            <button ejs-button (click)="close()">Close</button>
             <button ejs-button isPrimary="true" (click)="confirm()">Export</button>
           </div>
         </div>
@@ -65,7 +66,7 @@ import { FormsModule } from '@angular/forms';
     </div>
   `,
   styles: [`
-    .dialog-content { margin-top: -10px; }
+    .dialog-content { margin-top: -20px; }
     .dialog-content label { display:block; margin-bottom:4px; margin-top: 18px; }
     .dialog-content .buttons {
       text-align: right;
@@ -75,14 +76,19 @@ import { FormsModule } from '@angular/forms';
       margin-left: 18px;
     }
     .radio-button { margin-right: 16px; } 
-  `]
+    .radio-buttons {margin-top: -5px;}
+    #textbox > span{
+      margin-top : 10px
+    }
+  `], 
+  encapsulation : ViewEncapsulation.None
 })
 export class ExportDialogComponent {
   @ViewChild('dialog', { static: true }) dialog!: DialogComponent;
   @Output() exportConfirmed = new EventEmitter<{ fileName: string; format: string }>();
 
   visible = false;
-  fileName = 'diagram';
+  fileName = 'Diagram';
   format: 'PNG' | 'JPG' | 'SVG' = 'PNG';
 
   open() {
