@@ -44,7 +44,8 @@ import {
     }
 
     .toolbar-search {
-      width: 12rem !important; 
+      width: 11rem !important; 
+      padding-left: 4px !important;
     }
 
     .e-toolbar{
@@ -69,6 +70,9 @@ import {
     .counter-icon.hidden {
       display: none;
     }
+    .toolbar-search .e-input-group input.e-input, .e-input-group.e-control-wrapper input.e-input{
+      padding:0px !important;
+    }
   `]
 })
 export class ToolbarComponent implements AfterViewInit {
@@ -89,6 +93,8 @@ export class ToolbarComponent implements AfterViewInit {
     this._total = val;
     this.updateCounter();
   }
+
+  private shouldShowCounter = false;
 
   @ViewChild('textbox', { static: false }) textbox!: TextBoxComponent;
 
@@ -115,9 +121,8 @@ export class ToolbarComponent implements AfterViewInit {
   private updateCounter() {
     const counterEl = document.querySelector('.counter-icon');
     if (counterEl) {
-      const shouldShow = this._total > 0;
-      counterEl.textContent = shouldShow ? `${this._current} / ${this._total}` : '';
-      counterEl.classList.toggle('hidden', !shouldShow);
+      counterEl.textContent = this.shouldShowCounter ? `${this._current} / ${this._total}` : '';
+      counterEl.classList.toggle('hidden', !this.shouldShowCounter);
     }
   }
 
@@ -136,6 +141,11 @@ export class ToolbarComponent implements AfterViewInit {
     // Or native input event:
     else if (ev.target && (ev.target as HTMLInputElement).value != null) {
       val = (ev.target as HTMLInputElement).value;
+    }
+    if (val.trim() != ""){
+      this.shouldShowCounter = true;
+    }else{
+      this.shouldShowCounter = false;
     }
     this.searchNode.emit(val.trim());
   }
