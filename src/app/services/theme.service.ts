@@ -10,7 +10,6 @@ export interface ThemeSettings {
   expandIconColor: string;
   expandIconFillColor: string;
   expandIconBorder: string;
-  highlightColor: string;
   backgroundColor: string;
   gridlinesColor: string;
   childCountColor: string;
@@ -19,7 +18,9 @@ export interface ThemeSettings {
   popupKeyColor: string;
   popupValueColor: string;
   popupContentBGColor: string;
-  focusColor: string;
+  highlightFillColor: string;
+  highlightFocusColor: string;
+  highlightStrokeColor: string;
 }
 
 const themes: Record<string, ThemeSettings> = {
@@ -33,7 +34,6 @@ const themes: Record<string, ThemeSettings> = {
     expandIconColor: 'rgb(46, 51, 56)',
     expandIconFillColor: '#e0dede',
     expandIconBorder: 'rgb(188, 190, 192)',
-    highlightColor: '#e7f0e6',
     backgroundColor: '#F8F9FA',
     gridlinesColor: '#EBE8E8',
     childCountColor: 'rgb(41, 41, 41)',
@@ -42,7 +42,9 @@ const themes: Record<string, ThemeSettings> = {
     popupKeyColor: '#5C940D',
     popupValueColor: '#1864AB',
     popupContentBGColor: '#F8F9FA',
-    focusColor: 'yellow',
+    highlightFillColor: 'rgba(27, 255, 0, 0.1)',
+    highlightFocusColor: 'rgba(252, 255, 166, 0.57)',
+    highlightStrokeColor: 'rgb(0, 135, 54)',
   },
   dark: {
     nodeFillColor: 'rgb(41, 41, 41)',
@@ -54,7 +56,6 @@ const themes: Record<string, ThemeSettings> = {
     expandIconColor: 'rgb(220, 221, 222)',
     expandIconFillColor: '#1e1e1e',
     expandIconBorder: 'rgb(66, 66, 66)',
-    highlightColor: 'rgb(32, 97, 51, 0.5)',
     backgroundColor: '#1e1e1e',
     gridlinesColor: 'rgb(45, 45, 45)',
     childCountColor: 'rgb(255, 255, 255)',
@@ -63,7 +64,9 @@ const themes: Record<string, ThemeSettings> = {
     popupKeyColor: '#A5D8FF',
     popupValueColor: '#40C057',
     popupContentBGColor: '#1A1A1A',
-    focusColor: 'yellow',
+    highlightFillColor: 'rgba(27, 255, 0, 0.1)',
+    highlightFocusColor: 'rgba(82, 102, 0, 0.61)',
+    highlightStrokeColor: 'rgb(0, 135, 54)',
   }
 };
 class ThemeService {

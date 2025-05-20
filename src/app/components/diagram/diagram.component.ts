@@ -412,8 +412,9 @@ export class DiagramComponent implements OnInit {
     this.matchIds.forEach(id => {
       const elem = document.getElementById(id + '_content');
       if (elem) {
-        elem.setAttribute('stroke', 'lightgreen');
-        elem.setAttribute('fill', this.currentThemeSettings.highlightColor);
+        elem.setAttribute('stroke', this.currentThemeSettings.highlightStrokeColor);
+        elem.setAttribute('stroke-width', '2');
+        elem.setAttribute('fill', this.currentThemeSettings.highlightFillColor);
       }
     });
 
@@ -438,12 +439,13 @@ export class DiagramComponent implements OnInit {
     this.matchIds.forEach((nid, idx) => {
       const elem = document.getElementById(nid + '_content');
       if (elem) {
+        elem.setAttribute('stroke-width', '2');
         if (idx === this.matchIndex) {
-          elem.setAttribute('fill', this.currentThemeSettings.focusColor);
-          elem.setAttribute('stroke', 'gold');
+          elem.setAttribute('fill', this.currentThemeSettings.highlightFocusColor);
+          elem.setAttribute('stroke', this.currentThemeSettings.highlightStrokeColor);
         } else {
-          elem.setAttribute('fill', this.currentThemeSettings.highlightColor);
-          elem.setAttribute('stroke', 'lightgreen');
+          elem.setAttribute('fill', this.currentThemeSettings.highlightFillColor);
+          elem.setAttribute('stroke', this.currentThemeSettings.highlightStrokeColor);
         }
       }
     });
