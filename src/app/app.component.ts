@@ -33,6 +33,7 @@ export class AppComponent {
   editorType: 'json' | 'xml' = 'json';
   isValid = true;
   diagramData: DiagramData = { nodes: [], connectors: [] };
+  stats = { current: 0, total: 0 };
 
   private dragging = false;
   private startX = 0;

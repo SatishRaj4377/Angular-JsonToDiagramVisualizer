@@ -74,6 +74,7 @@ export class DiagramComponent implements OnInit {
   @Input() nodes: NodeModel[] = [];
   @Input() connectors: ConnectorModel[] = [];
   @Output() nodeClicked = new EventEmitter<{ content: string, path: string }>();
+  @Output() searchStats = new EventEmitter<{ current: number, total: number }>();
 
   @ViewChild('diagramRef', { static: false, read: EJ2Diagram }) public diagram!: EJ2Diagram;
 
@@ -87,6 +88,8 @@ export class DiagramComponent implements OnInit {
   currentOrientation: 'LeftToRight' | 'RightToLeft' | 'TopToBottom' | 'BottomToTop' = 'LeftToRight';
   orientations: Array<'LeftToRight'|'TopToBottom'|'RightToLeft'|'BottomToTop'> = ['LeftToRight','TopToBottom','RightToLeft','BottomToTop'];
   currentThemeSettings = themeService.getCurrentThemeSettings();
+  private matchIds: string[] = [];
+  private matchIndex = 0;
 
   ngOnInit(): void {
     this.diagramTools = DiagramTools.ZoomPan | DiagramTools.SingleSelect;
@@ -387,20 +390,77 @@ export class DiagramComponent implements OnInit {
 
   // searches for nodes in the diagram based on a query string
   public searchNodes(query: string) {
-    (this.diagram.nodes as DiagramNode[]).forEach(node => {
-      const elem = document.getElementById(node.id + '_content');
-      if (!elem) { return; }
-  
-      if (query) {
-        const text = (node.data.actualdata as string).toLowerCase();
-        const match = text.includes(query.toLowerCase());
-        elem.setAttribute('stroke', match ? "lightgreen" : this.currentThemeSettings.nodeStrokeColor);
-        elem.setAttribute('fill',   match ? this.currentThemeSettings.highlightColor : this.currentThemeSettings.nodeFillColor);
-      } else {
-        // reset to defaults when query is empty
-        elem.setAttribute('stroke', this.currentThemeSettings.nodeStrokeColor);
-        elem.setAttribute('fill',   this.currentThemeSettings.nodeFillColor);
+    // reset
+    this.matchIds = [];
+    this.matchIndex = 0;
+
+    // collect all matching node IDs
+    (this.diagram.nodes as DiagramNode[]).forEach(n => {
+      const text = String(n.data?.actualdata || '').toLowerCase();
+      if (query && text.includes(query.toLowerCase())) {
+        this.matchIds.push(n.id);
       }
+      // reset style on every node
+      const elem = document.getElementById(n.id + '_content');
+      if (elem) {
+        elem.setAttribute('stroke', this.currentThemeSettings.nodeStrokeColor);
+        elem.setAttribute('fill', this.currentThemeSettings.nodeFillColor);
+      }
+    });
+
+    // highlight *all* matches
+    this.matchIds.forEach(id => {
+      const elem = document.getElementById(id + '_content');
+      if (elem) {
+        elem.setAttribute('stroke', 'lightgreen');
+        elem.setAttribute('fill', this.currentThemeSettings.highlightColor);
+      }
+    });
+
+    // focus the very first one (if any)
+    this.focusCurrent();
+
+    // tell toolbar how many we found
+    this.searchStats.emit({
+      current: this.matchIds.length ? 1 : 0,
+      total: this.matchIds.length
+    });
+  }
+
+  /** bring the current match into center and give it “focus” style */
+  private focusCurrent() {
+    if (!this.matchIds.length) { return; }
+    const id = this.matchIds[this.matchIndex];
+    const node = this.diagram.getObject(id) as any;
+    if (!node) { return; }
+
+    // re‐highlight only the focused one differently
+    this.matchIds.forEach((nid, idx) => {
+      const elem = document.getElementById(nid + '_content');
+      if (elem) {
+        if (idx === this.matchIndex) {
+          elem.setAttribute('fill', this.currentThemeSettings.focusColor);
+          elem.setAttribute('stroke', 'gold');
+        } else {
+          elem.setAttribute('fill', this.currentThemeSettings.highlightColor);
+          elem.setAttribute('stroke', 'lightgreen');
+        }
+      }
+    });
+
+    // center it in the viewport
+    if (node.wrapper && node.wrapper.bounds)
+      this.diagram.bringToCenter(node.wrapper.bounds);
+  }
+
+  /** called by parent when Enter is pressed */
+  public focusNext() {
+    if (!this.matchIds.length) { return; }
+    this.matchIndex = (this.matchIndex + 1) % this.matchIds.length;
+    this.focusCurrent();
+    this.searchStats.emit({
+      current: this.matchIndex + 1,
+      total: this.matchIds.length
     });
   }
   

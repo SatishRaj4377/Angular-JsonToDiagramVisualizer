@@ -34,10 +34,14 @@
         #diagramComp
         [nodes]="diagramData.nodes"
         [connectors]="diagramData.connectors"
-        (nodeClicked)="onNodeClick($event)">
+        (nodeClicked)="onNodeClick($event)"
+        (searchStats)="stats = $event">
       </app-diagram>
 
       <app-toolbar
+        [total]="stats.total"
+        [current]="stats.current"
+        (nextMatch)="diagramComp.focusNext()"
         (toolClick)="handleToolbar($event)"
         (searchNode)="diagramComp.searchNodes($event)">
       </app-toolbar>

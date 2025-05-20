@@ -3,7 +3,8 @@ import {
   Output,
   EventEmitter,
   ViewEncapsulation,
-  ViewChild
+  ViewChild,
+  Input
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
@@ -27,18 +28,25 @@ import {
         [items]="toolbarItems"
         (clicked)="onToolClicked($event)">
       </ejs-toolbar>
-      <ejs-textbox 
+
+      <span class="hit-counter" *ngIf="total > 0">
+        {{ current }} / {{ total }}
+      </span>
+
+      <ejs-textbox
         #textbox
         cssClass="toolbar-search"
         placeholder="Search Node"
-        (input)="onSearch($event)" />
+        (input)="onSearch($event)"
+        (keydown.enter)="onNext()"/>
     </div>
   `,
   styles: [`
-    .diagram-toolbar {
-      display: flex;
-      align-items: center;
-      z-index: 10;
+    .diagram-toolbar { display: flex; align-items: center; }
+    .hit-counter {
+      margin: 0 8px;
+      font-family: Consolas;
+      font-size: 12px;
     }
     ejs-toolbar { 
       margin-right: 12px; border:0;
@@ -67,6 +75,10 @@ import {
 export class ToolbarComponent {
   @Output() toolClick   = new EventEmitter<'reset'|'fitToPage'|'zoomIn'|'zoomOut'>();
   @Output() searchNode  = new EventEmitter<string>();
+  @Output() nextMatch    = new EventEmitter<void>();
+
+  @Input() total = 0;     // total hits
+  @Input() current = 0;   // current focused hit (1-based)
 
   @ViewChild('textbox', { static: false }) textbox!: TextBoxComponent;
 
@@ -94,6 +106,10 @@ export class ToolbarComponent {
       val = (ev.target as HTMLInputElement).value;
     }
     this.searchNode.emit(val.trim());
+  }
+
+  onNext() {
+    this.nextMatch.emit();
   }
 
   clearSearchText() {

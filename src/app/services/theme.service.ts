@@ -19,6 +19,7 @@ export interface ThemeSettings {
   popupKeyColor: string;
   popupValueColor: string;
   popupContentBGColor: string;
+  focusColor: string;
 }
 
 const themes: Record<string, ThemeSettings> = {
@@ -41,6 +42,7 @@ const themes: Record<string, ThemeSettings> = {
     popupKeyColor: '#5C940D',
     popupValueColor: '#1864AB',
     popupContentBGColor: '#F8F9FA',
+    focusColor: 'yellow',
   },
   dark: {
     nodeFillColor: 'rgb(41, 41, 41)',
@@ -61,6 +63,7 @@ const themes: Record<string, ThemeSettings> = {
     popupKeyColor: '#A5D8FF',
     popupValueColor: '#40C057',
     popupContentBGColor: '#1A1A1A',
+    focusColor: 'yellow',
   }
 };
 class ThemeService {
