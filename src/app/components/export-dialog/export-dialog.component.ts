@@ -70,7 +70,7 @@ import { FormsModule } from '@angular/forms';
     .dialog-content label { display:block; margin-bottom:4px; margin-top: 18px; }
     .dialog-content .buttons {
       text-align: right;
-      margin-top: 16px;
+      margin-top: 18px;
     }
     .dialog-content .buttons button + button {
       margin-left: 18px;
