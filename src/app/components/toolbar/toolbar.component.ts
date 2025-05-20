@@ -54,7 +54,7 @@ import {
      border: 0;
     }
      
-    .e-toolbar .e-toolbar-item .e-tbar-btn{
+    body:not(.dark-theme) .e-toolbar .e-toolbar-item .e-tbar-btn{
       background: #343A401A !important;
       border-radius: 3px;
     }
@@ -72,6 +72,9 @@ import {
     .counter-icon.hidden {
       display: none;
     }
+    .e-toolbar, .e-toolbar .e-toolbar-items{
+      background: transparent !important;
+    } 
   `]
 })
 export class ToolbarComponent implements AfterViewInit {
@@ -98,7 +101,7 @@ export class ToolbarComponent implements AfterViewInit {
   @ViewChild('textbox', { static: false }) textbox!: TextBoxComponent;
 
   public toolbarItems: ItemModel[] = [
-    { prefixIcon: 'e-icons e-reset',      tooltipText: 'Reset',      id: 'reset',     cssClass: 'e-flat' },
+    { prefixIcon: 'e-icons e-reset',      tooltipText: 'Reset Zoom',      id: 'reset',     cssClass: 'e-flat' },
     { prefixIcon: 'e-icons e-zoom-to-fit', tooltipText: 'Fit To Page',id: 'fitToPage', cssClass: 'e-flat' },
     { prefixIcon: 'e-icons e-zoom-in',     tooltipText: 'Zoom In',    id: 'zoomIn',    cssClass: 'e-flat' },
     { prefixIcon: 'e-icons e-zoom-out',    tooltipText: 'Zoom Out',   id: 'zoomOut',   cssClass: 'e-flat' }
