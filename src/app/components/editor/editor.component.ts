@@ -100,6 +100,7 @@ export class EditorComponent implements OnInit, OnChanges, OnDestroy {
           const wrapped = `<root>${current}</root>`;
           const result = await xml2js.parseStringPromise(wrapped, {
             explicitArray: false,
+            mergeAttrs: true,
           });
           jsonObject = result.root;
         } else {
@@ -144,6 +145,7 @@ export class EditorComponent implements OnInit, OnChanges, OnDestroy {
         const wrappedXml = `<root>${current}</root>`;
         const result = await xml2js.parseStringPromise(wrappedXml, {
           explicitArray: false,
+          mergeAttrs: true,
         });
         jsonObject = result.root;
         displayContent = JSON.stringify(jsonObject, null, 2);
@@ -186,7 +188,7 @@ export class EditorComponent implements OnInit, OnChanges, OnDestroy {
         // Attempt to parse as XML
         const wrapped = `<root>${this.code}</root>`;
         xml2js
-          .parseStringPromise(wrapped, { explicitArray: false })
+          .parseStringPromise(wrapped, { explicitArray: false, mergeAttrs: true, })
           .then((json) => this.runParser(json.root))
           .catch(() => this.validStatus.emit(false));
       }
