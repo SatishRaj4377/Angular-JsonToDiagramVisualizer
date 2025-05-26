@@ -5,6 +5,7 @@ import {
 } from '@angular/core';
 import { DialogModule, DialogComponent } from '@syncfusion/ej2-angular-popups';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { CommonModule } from '@angular/common';
 
 interface JsonLine {
   key: string;
@@ -14,7 +15,7 @@ interface JsonLine {
 
 @Component({
   selector: 'app-node-popup',
-  imports: [ DialogModule ],
+  imports: [ DialogModule, CommonModule ],
   template: `
     <ejs-dialog
       #dialog
@@ -32,9 +33,12 @@ interface JsonLine {
           <label>Content</label>
           <div class="dialog-box">
             <div [innerHTML]="contentHtml"></div>
-            <button class="copy-btn" (click)="copyContent()">
-              <span class="e-icons e-copy"></span>
-            </button>
+              <button class="copy-btn" (click)="copyContent()">
+                <span
+                  class="e-icons"
+                  [ngClass]="{'e-copy': !contentCopied, 'e-check': contentCopied}"
+                ></span>
+              </button>
           </div>
         </div>
         <!-- Path Section -->
@@ -42,9 +46,12 @@ interface JsonLine {
           <label>JSON Path</label>
           <div class="dialog-box">
             <div [innerHTML]="pathHtml"></div>
-            <button class="copy-btn" (click)="copyPath()">
-              <span class="e-icons e-copy"></span>
-            </button>
+              <button class="copy-btn" (click)="copyPath()">
+                <span
+                  class="e-icons"
+                  [ngClass]="{'e-copy': !pathCopied, 'e-check': pathCopied}"
+                ></span>
+              </button>
           </div>
         </div>
       </div>
@@ -116,6 +123,10 @@ export class NodePopupComponent {
   rawContent = '';
   rawPath = '';
 
+  /** Indicates copy status for toggling the icon */
+  contentCopied = false;
+  pathCopied = false;
+
   /** Sanitized HTML for binding */
   contentHtml!: SafeHtml;
   pathHtml!: SafeHtml;
@@ -148,7 +159,10 @@ export class NodePopupComponent {
   /** Copy the full, brace‑wrapped JSON block exactly as displayed */
   copyContent(): void {
     const json = this.getFormattedJsonString(this.rawContent);
-    navigator.clipboard.writeText(json);
+    navigator.clipboard.writeText(json).then(() => {
+      this.contentCopied = true;
+      setTimeout(() => (this.contentCopied = false), 2000);
+    });
   }
 
   /** Copy the path, wrapping only the leading 'Root' in { } */
@@ -156,7 +170,10 @@ export class NodePopupComponent {
     const wrapped = this.rawPath.startsWith('Root')
       ? `{Root}${this.rawPath.slice(4)}`
       : this.rawPath;
-    navigator.clipboard.writeText(wrapped);
+    navigator.clipboard.writeText(wrapped).then(() => {
+      this.pathCopied = true;
+      setTimeout(() => (this.pathCopied = false), 2000);
+    });
   }
 
   /** Helper: reconstruct the formatted JSON with braces & commas */
