@@ -68,3 +68,8 @@ button[ejs-dropdownbutton] {
   border: none !important;
   box-shadow: none !important;
 }
+
+.nav-logo {
+  width: 2.2rem;
+  margin-right: .1rem;
+}
