@@ -23,7 +23,7 @@
   font-weight: 600;
   margin-right: 24px;
   color: #333333;
-  width: 260px;
+  width: 220px;
 }
 
 /* Syncfusion dropdown buttons */
@@ -72,4 +72,8 @@ button[ejs-dropdownbutton] {
 .nav-logo {
   width: 2.2rem;
   margin-right: .1rem;
+}
+
+:host-context(.dark-theme) .nav-logo {
+  filter: brightness(0) invert(1);
 }
