@@ -446,7 +446,7 @@ export class DiagramComponent implements OnInit {
       if (n.expandIcon) this.updateIconOffset(n.expandIcon);
       if (n.collapseIcon) this.updateIconOffset(n.collapseIcon);
     });
-    this.diagram.fitToPage();
+    setTimeout(() => this.diagram.fitToPage());
   }
 
   // Toggles the collapse state of the diagram nodes

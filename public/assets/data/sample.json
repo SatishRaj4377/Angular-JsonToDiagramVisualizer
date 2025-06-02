@@ -1,26 +1,26 @@
 {
-  "TestingData": {
-    "university": {
-      "name": "Global Tech University",
+  "GeneralProfile": {
+    "entity": {
+      "name": "Community Resource Center",
       "location": {
-        "city": "San Francisco",
-        "state": "California",
+        "city": "Springfield",
+        "state": "Illinois",
         "country": "USA"
       }
     },
-    "administration": {
-      "chancellor": "Dr. Marie Curie",
-      "registrar": "Dr. Albert Einstein",
-      "admissions_office": {
-        "director": "Dr. Rosalind Franklin",
-        "application_deadline": "2025-05-15"
+    "management": {
+      "head": "Jordan Lee",
+      "coordinator": "Alex Kim",
+      "support_team": {
+        "lead": "Taylor Morgan",
+        "event_deadline": "2025-08-15"
       }
     },
-    "campus_facilities": {
-      "library": {
-        "name": "Tech Scholars Library",
-        "books_available": 50000,
-        "digital_resources": true
+    "facilities": {
+      "information_hub": {
+        "name": "Public Access Library",
+        "resources_available": 7500,
+        "digital_access": true
       }
     }
   }
