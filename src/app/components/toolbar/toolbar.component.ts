@@ -81,31 +81,32 @@ export class ToolbarComponent implements AfterViewInit {
   @Output() toolClick   = new EventEmitter<'reset'|'fitToPage'|'zoomIn'|'zoomOut'>();
   @Output() searchNode  = new EventEmitter<string>();
   @Output() nextMatch    = new EventEmitter<void>();
-
-  private _current = 0;
-  @Input()
-  set current(val: number) {
-    this._current = val;
-    this.updateCounter();
-  }
   
-  private _total = 0;
-  @Input()
-  set total(val: number) {
-    this._total = val;
-    this.updateCounter();
-  }
-
-  private shouldShowCounter = false;
-
   @ViewChild('textbox', { static: false }) textbox!: TextBoxComponent;
 
+  private shouldShowCounter = false;
   public toolbarItems: ItemModel[] = [
     { prefixIcon: 'e-icons e-reset',      tooltipText: 'Reset Zoom',      id: 'reset',     cssClass: 'e-flat' },
     { prefixIcon: 'e-icons e-zoom-to-fit', tooltipText: 'Fit To Page',id: 'fitToPage', cssClass: 'e-flat' },
     { prefixIcon: 'e-icons e-zoom-in',     tooltipText: 'Zoom In',    id: 'zoomIn',    cssClass: 'e-flat' },
     { prefixIcon: 'e-icons e-zoom-out',    tooltipText: 'Zoom Out',   id: 'zoomOut',   cssClass: 'e-flat' }
   ];
+
+  // Update the current search result index and show the counter if needed
+  private _current = 0;
+  @Input()
+  set current(val: number) {
+    this._current = val;
+    this.updateCounter();
+  }
+
+  // Update the total number of search results and show the counter if needed
+  private _total = 0;
+  @Input()
+  set total(val: number) {
+    this._total = val;
+    this.updateCounter();
+  }
 
 
   ngAfterViewInit() {
@@ -153,9 +154,11 @@ export class ToolbarComponent implements AfterViewInit {
   }
 
   onNext() {
+    // emit the event to find the next match on enter key press
     this.nextMatch.emit();
   }
 
+  // clear the search box text and reset the counter
   clearSearchText() {
     if (this.textbox) {
       this.textbox.value = '';

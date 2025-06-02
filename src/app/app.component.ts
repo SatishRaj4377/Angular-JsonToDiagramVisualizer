@@ -13,7 +13,6 @@ import { ToolbarComponent } from './components/toolbar/toolbar.component';
 import themeService, { ThemeName } from './services/theme.service';
 import { SpinnerComponent } from './components/spinner/spinner.component';
 
-
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -38,32 +37,8 @@ export class AppComponent {
   private dragging = false;
   private startX = 0;
   private startWidth = 0;
-
-  //#region  Splitter Dragging
-  onDragStart(evt: MouseEvent) {
-    this.dragging = true;
-    this.startX = evt.clientX;
-    this.startWidth = this.leftPanel.nativeElement.getBoundingClientRect().width;
-    evt.preventDefault();
-  }
-
-  @HostListener('document:mousemove', ['$event'])
-  onDragging(evt: MouseEvent) {
-    if (!this.dragging) return;
-    const dx = evt.clientX - this.startX;
-    const newWidth = this.startWidth + dx;
-    const min = 150, max = window.innerWidth * 0.5;
-    this.leftPanel.nativeElement.style.width =
-      Math.min(Math.max(newWidth, min), max) + 'px';
-    this.editorComp.layoutEditor();
-  }
-
-  @HostListener('document:mouseup')
-  onDragEnd() {
-    this.dragging = false;
-  }
-  //#endregion
   
+  // on receiving parsed diagram data from the editor, update the diagram
   onDiagramData(data: DiagramData) {
     this.spinner.visible = true;
     this.toolbar.clearSearchText();
@@ -72,6 +47,7 @@ export class AppComponent {
     this.spinner.visible = false;
   }
 
+  // handle File → Import / Export
   onFileAction(action: string) {
     if (action === 'import') {
       const input = document.createElement('input');
@@ -121,6 +97,7 @@ export class AppComponent {
     this.diagramComp.refreshLayout();
   }
 
+  // handle Theme change
   onThemeChange(theme: string) {
     this.spinner.visible = true;
     const isDark = theme === 'dark';
@@ -145,14 +122,17 @@ export class AppComponent {
     this.toolbar.clearSearchText();
   }
   
+  // handle Editor type change (JSON / XML)
   onEditorTypeChanged(type: 'json' | 'xml') {
     this.editorType = type;
   }
   
+  // open popup component with node data on node click
   onNodeClick(data: { content: string; path: string }) {
     this.popup.open(data);
   }
 
+  // export diagram on select file format from export dialog
   onExport(evt: { fileName: string; format: string }) {
     this.diagramComp.diagram.exportDiagram({
       format: evt.format as FileFormats,
@@ -160,6 +140,7 @@ export class AppComponent {
     });
   }
 
+  // handle toolbar actions
   handleToolbar(action: 'reset'|'fitToPage'|'zoomIn'|'zoomOut') {
     switch(action) {
       case 'reset':
@@ -173,5 +154,26 @@ export class AppComponent {
     }
   }
   
+  // splitter implementation to resize the editor component horizontally
+  onDragStart(evt: MouseEvent) {
+    this.dragging = true;
+    this.startX = evt.clientX;
+    this.startWidth = this.leftPanel.nativeElement.getBoundingClientRect().width;
+    evt.preventDefault();
+  }
+  @HostListener('document:mousemove', ['$event'])
+  onDragging(evt: MouseEvent) {
+    if (!this.dragging) return;
+    const dx = evt.clientX - this.startX;
+    const newWidth = this.startWidth + dx;
+    const min = 150, max = window.innerWidth * 0.5;
+    this.leftPanel.nativeElement.style.width =
+      Math.min(Math.max(newWidth, min), max) + 'px';
+    this.editorComp.layoutEditor();
+  }
+  @HostListener('document:mouseup')
+  onDragEnd() {
+    this.dragging = false;
+  }
 
 }

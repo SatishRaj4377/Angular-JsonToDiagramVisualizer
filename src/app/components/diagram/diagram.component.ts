@@ -72,16 +72,11 @@ import themeService from '../../services/theme.service';
   encapsulation: ViewEncapsulation.None,
 })
 export class DiagramComponent implements OnInit {
+  @ViewChild('diagramRef', { static: false, read: EJ2Diagram }) public diagram!: EJ2Diagram;
   @Input() nodes: NodeModel[] = [];
   @Input() connectors: ConnectorModel[] = [];
   @Output() nodeClicked = new EventEmitter<{ content: string; path: string }>();
-  @Output() searchStats = new EventEmitter<{
-    current: number;
-    total: number;
-  }>();
-
-  @ViewChild('diagramRef', { static: false, read: EJ2Diagram })
-  public diagram!: EJ2Diagram;
+  @Output() searchStats = new EventEmitter<{ current: number; total: number; }>();
 
   public diagramTools!: DiagramTools;
   public layout!: LayoutModel;
@@ -90,6 +85,8 @@ export class DiagramComponent implements OnInit {
   isGraphCollapsed = false;
   showExpandCollapseIcon = true;
   showChildItemsCount = true;
+  matchIds: string[] = [];
+  matchIndex = 0;
   currentOrientation:
     | 'LeftToRight'
     | 'RightToLeft'
@@ -99,11 +96,12 @@ export class DiagramComponent implements OnInit {
     'LeftToRight' | 'TopToBottom' | 'RightToLeft' | 'BottomToTop'
   > = ['LeftToRight', 'TopToBottom', 'RightToLeft', 'BottomToTop'];
   currentThemeSettings = themeService.getCurrentThemeSettings();
-  private matchIds: string[] = [];
-  private matchIndex = 0;
 
   ngOnInit(): void {
+    // configure diagram tools
     this.diagramTools = DiagramTools.ZoomPan | DiagramTools.SingleSelect;
+
+    // configure diagram snap settings, with gridlines color based on current theme
     this.snapSettings = {
       constraints: SnapConstraints.ShowLines,
       horizontalGridlines: {
@@ -113,6 +111,8 @@ export class DiagramComponent implements OnInit {
         lineColor: this.currentThemeSettings.gridlinesColor,
       },
     };
+
+    // configure diagram layout
     this.layout = {
       type: 'HierarchicalTree',
       orientation: this.currentOrientation,
@@ -122,8 +122,7 @@ export class DiagramComponent implements OnInit {
     };
   }
 
-  // This method initializes and returns a NodeModel with default settings depending on whether it is a main root, leaf, or a regular node.
-  // It sets visual properties such as shape, size, and style based on node type and adjusts constraints and expand icons appropriately.
+  // Node Defaults
   getNodeDefaults(node: NodeModel): NodeModel {
     const isLeaf = (node as DiagramNode).additionalInfo?.isLeaf === true;
     const isMainRoot = node.id === 'main-root';
@@ -133,6 +132,7 @@ export class DiagramComponent implements OnInit {
     const expandIconWidth = 36;
     const cornerRadius = 3;
 
+    // configure node constraints
     node.constraints =
       NodeConstraints.Default &
       ~(
@@ -143,6 +143,7 @@ export class DiagramComponent implements OnInit {
         NodeConstraints.Drag
       );
 
+    // configure node shape and style
     node.shape = {
       type: 'Basic',
       shape: isMainRoot ? 'Ellipse' : 'Rectangle',
@@ -154,6 +155,7 @@ export class DiagramComponent implements OnInit {
       strokeWidth: 1.5,
     };
 
+    // for main root node, set fixed size, else calculate size based on annotations
     if (isMainRoot) {
       node.width = 40;
       node.height = 40;
@@ -169,10 +171,14 @@ export class DiagramComponent implements OnInit {
       node.height = height;
     }
 
+    // configure node annotations
     if (node.annotations) {
+      // configure annotations positining and styling for leaf nodes(nodes that don't have any childs)
       if (isLeaf) {
-        this.layoutLeafAnnotations(node, fontSpec, padding, lineHeight);
-      } else if (node.annotations.length === 2) {
+        this.layoutLeafAnnotations(node, fontSpec, padding);
+      } 
+      // configure annotations positining and styling for non-leaf nodes(nodes that have childs)
+      else if (node.annotations.length === 2) {
         const keyAnn = node.annotations[0];
         const countAnn = node.annotations[1];
         keyAnn.style = {
@@ -210,7 +216,7 @@ export class DiagramComponent implements OnInit {
         }
       }
     }
-
+    // configure expand/collapse icons for non-leaf nodes
     if (!isLeaf && !isMainRoot && this.showExpandCollapseIcon) {
       const expandIcon = this.createIcon(
         'Minus',
@@ -282,7 +288,6 @@ export class DiagramComponent implements OnInit {
     node: NodeModel,
     fontSpec: string,
     padding: number,
-    lineHeight: number
   ) {
     const anns = node.annotations as ShapeAnnotation[];
     const total = anns.filter((a) => a.id?.startsWith('Key')).length;
@@ -295,7 +300,7 @@ export class DiagramComponent implements OnInit {
       const ann = anns[i];
       if (!ann.id) continue;
       const y = spacingY * line;
-
+      // Position the key and value annotations side by side
       if (ann.id.startsWith('Key')) {
         const w = ctx.measureText(ann.content).width;
         ann.style = {
@@ -316,6 +321,7 @@ export class DiagramComponent implements OnInit {
         const keyX = keyW / 2 / node.width!;
         const valX =
           keyX * 2 + valW / 2 / node.width! + (padding + 8) / node.width!;
+        // if there is a previous annotation, position the value annotation next to it, or else position it at the center(default)
         if (prev) {
           ann.offset = { x: valX, y };
           ann.content = this.formatDisplayValue(ann.content);
@@ -326,7 +332,7 @@ export class DiagramComponent implements OnInit {
     }
   }
 
-  // Format the display value for annotations
+  // Format the display value for annotations based on its type
   private formatDisplayValue(raw: string): string {
     const num = parseFloat(raw);
     if (this.isPureNumber(raw) || /^(true|false)$/i.test(raw)) {
@@ -394,7 +400,7 @@ export class DiagramComponent implements OnInit {
     }
   }
 
-  // sets the default values for the connectors in the diagram
+  // Connector Defaults
   getConnectorDefaults(connector: ConnectorModel): ConnectorModel {
     connector.constraints =
       ConnectorConstraints.Default & ConnectorConstraints.Select;
@@ -417,7 +423,7 @@ export class DiagramComponent implements OnInit {
     });
   }
 
-  // Triggers popup that displays popup
+  // trigger popup that displays popup on node click
   public onDiagramClick(args: any) {
     const e = args.element;
     if (e?.data?.actualdata && e.data?.path && args.actualObject) {
@@ -446,10 +452,13 @@ export class DiagramComponent implements OnInit {
   // Toggles the collapse state of the diagram nodes
   public toggleCollapse(): void {
     const nodes = this.diagram.nodes;
+    // if the graph is collapsed, expand all nodes
     if (this.isGraphCollapsed) {
       nodes.forEach((n) => (n.isExpanded = true));
       this.isGraphCollapsed = false;
-    } else {
+    } 
+    // if the graph is expanded, collapse all root nodes
+    else {
       (nodes as Node[]).forEach((n) => {
         const root = !n.inEdges || n.inEdges.length === 0;
         if (root) {
@@ -513,7 +522,7 @@ export class DiagramComponent implements OnInit {
     });
   }
 
-  /** bring the current match into center and give it “focus” style */
+  // bring the current match into center and give it “focus” style 
   private focusCurrent() {
     if (!this.matchIds.length) {
       return;
@@ -556,7 +565,7 @@ export class DiagramComponent implements OnInit {
       this.diagram.bringToCenter(node.wrapper.bounds);
   }
 
-  /** called by parent when Enter is pressed */
+  // called by parent when Enter is pressed
   public focusNext() {
     if (!this.matchIds.length) {
       return;

@@ -23,10 +23,11 @@ export class SpinnerComponent implements AfterViewInit {
     // Grab the DIV and convert it into a Syncfusion spinner
     this.el = this.host.nativeElement.querySelector('#spinner');
     createSpinner({ target: this.el });
-    // Optionally hide it by default:
+    // hide it by default:
     hideSpinner(this.el);
   }
 
+  // Show or hide the spinner when the visible property changes
   @Input()
   set visible(v: boolean) {
     if (!this.el) { return; }

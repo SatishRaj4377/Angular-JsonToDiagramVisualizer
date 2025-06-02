@@ -122,12 +122,8 @@ export class NodePopupComponent {
   visible = false;
   rawContent = '';
   rawPath = '';
-
-  /** Indicates copy status for toggling the icon */
   contentCopied = false;
   pathCopied = false;
-
-  /** Sanitized HTML for binding */
   contentHtml!: SafeHtml;
   pathHtml!: SafeHtml;
 

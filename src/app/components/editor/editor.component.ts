@@ -48,6 +48,7 @@ export class EditorComponent implements OnInit, OnChanges, OnDestroy {
   private platformId = inject(PLATFORM_ID);
   isBrowser = isPlatformBrowser(this.platformId);
 
+  // editor options for monaco editor
   editorOptions = {
     language: 'json' as 'json' | 'xml',
     scrollBeyondLastLine: false,
@@ -61,11 +62,13 @@ export class EditorComponent implements OnInit, OnChanges, OnDestroy {
   ngOnInit(): void {
     if (!this.isBrowser) return;
 
+    // fetch sample data and set it as the initial code
     fetch('/assets/data/sample.json')
       .then((r) => r.json())
       .then((json) => (this.code = JSON.stringify(json, null, 2)))
       .finally(() => this.onCodeChange());
 
+    // subscribe to language changes from the editor service
     this.editorSubscription = this.editorService.language$.subscribe(
       (newLanguage) => {
         if (newLanguage !== this.editorType) {
@@ -81,11 +84,13 @@ export class EditorComponent implements OnInit, OnChanges, OnDestroy {
 
   ngOnChanges(changes: SimpleChanges) {
     if (!this.isBrowser) return;
+    // switch editor type if the input changes
     if (changes['editorType'] && !changes['editorType'].firstChange) {
       this.switchEditorType(this.editorType);
     }
   }
 
+  // on editor type chnage, convert JSON to XML or vice versa
   private async switchEditorType(targetType: 'json' | 'xml') {
     const current = this.code;
     let displayContent = current;
@@ -168,6 +173,7 @@ export class EditorComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
+  // handle code changes in the editor
   onCodeChange() {
     if (!this.code?.trim()) {
       this.validStatus.emit(false);
@@ -198,6 +204,7 @@ export class EditorComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
+  // try to convert the json data to diagram data, to check if data is valid or not
   private runParser(obj: any) {
     try {
       const result = this.parser.processJson(obj);

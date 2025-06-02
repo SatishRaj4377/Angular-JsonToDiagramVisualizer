@@ -42,12 +42,9 @@ export class HamburgerComponent {
   @Output() rotateLayout  = new EventEmitter<void>();
   @Output() collapseGraph = new EventEmitter<void>();
 
-  // Grab the Angular wrapper instance
   @ViewChild('hamburgerBtn', { static: true })
   private ddBtn!: DropDownButtonComponent;
-
   private isCollapsed = false;
-
   public menuItems: ItemModel[] = [
     { text: 'Export as Image', id: 'exportImage', iconCss: 'e-icons e-export' },
     { text: 'Rotate Layout',   id: 'rotateLayout',  iconCss: 'e-icons e-refresh' },

@@ -1,5 +1,5 @@
 <div class="main-container">
-  <!-- Your navbar at top -->
+  <!-- Nav Bar -->
   <app-navbar
     (fileAction)="onFileAction($event)"
     (viewToggle)="onViewToggle($event)"
@@ -7,7 +7,6 @@
     (editorTypeChanged)="onEditorTypeChanged($event)">
   </app-navbar>
 
-  <!-- Split panels grow to fill -->
   <div class="app-container">
     <!-- Left: editor -->
     <div #leftPanel class="panel left-panel">
@@ -21,7 +20,7 @@
     <!-- Draggable splitter -->
     <div class="splitter" (mousedown)="onDragStart($event)"></div>
 
-    <!-- Right: diagram + overlayed hamburger & toolbar -->
+    <!-- Right: diagram + hamburger menu & toolbar -->
     <div class="panel right-panel">
       <app-spinner [visible]="!isValid"></app-spinner>
       <app-hamburger
@@ -48,7 +47,7 @@
     </div>
   </div>
 
-  <!-- Status bar at the very bottom -->
+  <!-- Status bar -->
   <div class="status-bar">
     <span class="status-message" [class.invalid]="!isValid">
       <i *ngIf="isValid" class="e-icons e-check"></i>
